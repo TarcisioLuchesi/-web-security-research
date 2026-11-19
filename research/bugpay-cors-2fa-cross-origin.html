@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Estudo de caso de CORS permissivo em um endpoint 2FA da BugPay: leitura cross-origin, limitações da PoC, reteste e divulgação responsável.">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>CORS permissivo no fluxo 2FA da BugPay — poystick</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .article h3{margin:30px 0 8px;color:#eee;font:700 16px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .article a{color:#aab7ff;text-decoration:underline;text-underline-offset:3px}
+    .article a:hover{color:#fff}
+    .article strong{color:#eee}
+    .article ul{padding-left:24px}
+    .article li{margin-bottom:10px}
+    .note{margin:24px 0;padding:18px 20px;background:#111;border:1px solid var(--line);border-left:3px solid #777}
+    .note strong{color:#fff}
+    pre code{white-space:pre}
+    .article-hero h1{line-height:1.05;letter-spacing:-.045em}
+    @media(max-width:600px){.site-header{align-items:flex-start;padding:18px 0}nav{gap:12px;flex-wrap:wrap;justify-content:flex-end}.article-shell{padding-top:56px}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="logo" href="../">poystick<span>.</span></a>
+    <nav>
+      <a href="../#writeups">write-ups</a>
+      <a href="../#pocs">PoCs</a>
+      <a href="../methodology.html">metodologia</a>
+      <a href="../#sobre">sobre</a>
+      <a href="https://github.com/TarcisioLuchesi">github ↗</a>
+    </nav>
+  </header>
+
+  <main class="article-shell">
+    <section class="article-hero">
+      <div class="kicker">pesquisa de segurança / bug bounty / responsible disclosure</div>
+      <h1>CORS permissivo no fluxo 2FA da BugPay</h1>
+      <p class="hero-copy">Da leitura cross-origin em uma função de autenticação ao reteste da restrição de origem: o que consegui demonstrar, o que permaneceu hipotético e o que mudou.</p>
+      <div class="article-meta">
+        <span>06–18 nov. 2026</span>
+        <span>BugPay</span>
+        <span>CORS</span>
+        <span>2FA</span>
+        <span>Black-box</span>
+        <span>Severidade: Low</span>
+      </div>
+      <div class="article-meta">
+        <span>Pesquisa: Tarcísio Luchesi (Poystick)</span>
+        <span>Report aceito e concluído</span>
+        <span>Divulgação autorizada em 18/11/2026</span>
+      </div>
+    </section>
+
+    <article class="article">
+      <p>
+        Durante uma análise de segurança na BugPay, investiguei uma função usada no início do fluxo
+        de autenticação em duas etapas (2FA). A hipótese era simples: um site de outra origem conseguiria
+        chamar essa função e ler sua resposta no navegador, apesar de não fazer parte da aplicação legítima?
+        A resposta inicial foi sim. Em um teste com uma página externa, consegui iniciar um desafio e
+        acessar o JSON devolvido pelo endpoint.
+      </p>
+      <p>
+        Essa observação era relevante porque a função participava de uma operação de autenticação.
+        No entanto, <strong>ler uma resposta de desafio 2FA não equivale a obter uma sessão</strong>.
+        O objetivo deste texto é separar o comportamento observado das possibilidades que ainda
+        precisariam ser demonstradas para sustentar um impacto maior.
+      </p>
+
+      <div class="note">
+        <strong>Resultado em uma frase:</strong> observei uma política CORS com
+        <code>Access-Control-Allow-Origin: *</code> e leitura cross-origin do resultado de
+        <code>action: "start"</code>; no reteste, o navegador passou a bloquear a leitura a partir
+        de uma origem externa. A BugPay aceitou o reporte, reclassificou a severidade para
+        <strong>Low</strong>, concluiu o processo e autorizou esta publicação.
+      </div>
+
+      <h2>1. O que CORS controla</h2>
+      <p>
+        CORS (<em>Cross-Origin Resource Sharing</em>) é o mecanismo pelo qual um servidor informa ao
+        navegador quais origens podem acessar respostas de recursos em outro domínio. Se um script em
+        <code>https://pesquisa.example</code> faz uma requisição para uma API diferente, a política de
+        mesma origem limita a leitura da resposta, a menos que o servidor a autorize por cabeçalhos CORS.
+      </p>
+      <p>
+        O valor <code>*</code> significa que a resposta pode ser disponibilizada a scripts de qualquer
+        origem <strong>em requisições sem credenciais</strong>. Ele não é, sozinho, prova de uma falha
+        grave: APIs públicas podem usar essa configuração legitimamente. Por outro lado, endpoints
+        que retornam dados sensíveis ou expõem comportamentos relevantes para a autenticação exigem
+        uma avaliação mais cuidadosa.
+      </p>
+      <p>
+        Um detalhe decisivo: navegadores <strong>não liberam uma resposta com credenciais</strong>
+        quando ela usa <code>Access-Control-Allow-Origin: *</code>. Portanto, a existência desse
+        cabeçalho não permite concluir, sem provas adicionais, que cookies de sessão, tokens
+        privados ou dados autenticados estavam acessíveis.
+      </p>
+
+      <h2>2. A superfície investigada</h2>
+      <p>
+        O ponto analisado foi o caminho <code>POST /functions/v1/password-login-2fa</code>,
+        associado a uma função de backend no fluxo de 2FA. Nos testes, a ação de interesse era
+        <code>start</code>, responsável por iniciar um desafio de autenticação.
+      </p>
+      <div class="flow">Página em origem externa
+    ↓ fetch() a partir do navegador
+POST /functions/v1/password-login-2fa
+    ↓ action: "start"
+Desafio 2FA gerado
+    ↓ resposta JSON + cabeçalhos CORS
+JavaScript da página externa lê a resposta (teste inicial)</div>
+      <p>
+        A PoC utilizou uma origem controlada para verificar não apenas o status HTTP, mas se o
+        JavaScript <em>de fato recebia</em> o corpo da resposta. Essa distinção importa: um
+        <code>200 OK</code> visto na aba de rede ou um <code>OPTIONS</code> bem-sucedido não bastam
+        para demonstrar que a leitura cross-origin foi liberada.
+      </p>
+
+      <h2>3. Evidências do teste inicial — 6 de novembro de 2026</h2>
+      <p>
+        A resposta observada incluía status <code>200</code> e a diretiva CORS abaixo.
+        O exemplo é uma <strong>representação reduzida</strong> do comportamento observado, não
+        uma transcrição integral da requisição original:
+      </p>
+      <pre><code>HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+
+{
+  "success": true,
+  "challenge_id": "[valor omitido]",
+  "user_id": "[valor omitido]",
+  "email": "[endereço mascarado]"
+}</code></pre>
+      <p>
+        Na PoC, o navegador conseguiu obter esse JSON a partir de um site externo. A ação
+        <code>start</code> também resultou na criação de um desafio 2FA. Foram removidos deste
+        artigo identificadores concretos, chaves, tokens, códigos temporários e informações pessoais.
+      </p>
+      <p>
+        O achado confirmado nessa etapa foi <strong>acesso cross-origin ao resultado da
+        operação inicial de 2FA</strong>. Isso ampliava a superfície de interação disponível a
+        páginas de terceiros e justificava investigar se a operação expunha informações ou
+        efeitos que deveriam estar restritos a origens confiáveis.
+      </p>
+
+      <h2>4. O que a PoC não comprovou</h2>
+      <p>
+        O título original do reporte levantou a hipótese de que a configuração pudesse
+        contribuir para um cenário de <em>Account Takeover</em> (ATO). Entretanto, os registros
+        dos testes não permitem afirmar que esse resultado tenha sido alcançado.
+      </p>
+      <ul>
+        <li><strong>Sem ATO demonstrado:</strong> não houve prova de acesso indevido a uma conta de terceiros ou de criação de uma sessão autenticada por meio da página externa.</li>
+        <li><strong>Sem exfiltração de access token demonstrada:</strong> os campos legíveis no retorno de <code>start</code> não comprovavam que um token de sessão tivesse sido exposto.</li>
+        <li><strong>Sem bypass completo do 2FA:</strong> uma tentativa posterior com <code>verify</code> envolvia outro contexto de autenticação e identificadores não correspondentes; ela não demonstrou a cadeia completa.</li>
+        <li><strong>Sem leitura autenticada comprovada:</strong> a leitura de uma resposta sem credenciais, autorizada pelo wildcard, não implica que uma resposta protegida por cookies pudesse ser lida.</li>
+      </ul>
+      <p>
+        Também é necessário distinguir a capacidade de <em>iniciar</em> um desafio de uma falha de
+        autorização. Algumas aplicações permitem iniciar um desafio antes do login por desenho.
+        Para afirmar uma vulnerabilidade de maior impacto, seria preciso provar uma consequência
+        adicional e indevida, não apenas a existência da chamada.
+      </p>
+
+      <h2>5. Reteste — 9 de novembro de 2026</h2>
+      <p>
+        Após o envio e a análise do reporte, repeti a verificação com uma página HTML fora da
+        origem da BugPay. No reteste, o endpoint passou a anunciar uma origem específica:
+      </p>
+      <pre><code>Access-Control-Allow-Origin: https://app.bugpay.com.br</code></pre>
+      <p>
+        As tentativas feitas na origem externa deixaram de entregar a resposta ao JavaScript.
+        O navegador bloqueou a operação de leitura e a PoC apresentou
+        <code>Failed to fetch</code>.
+      </p>
+      <div class="flow">Teste inicial — 06/11
+Origem externa → resposta JSON legível
+Access-Control-Allow-Origin: *
+
+Reteste — 09/11
+Origem externa → leitura bloqueada pelo navegador
+Access-Control-Allow-Origin: https://app.bugpay.com.br</div>
+      <p>
+        O reteste mostrou uma <strong>mudança efetiva no comportamento CORS observado</strong>,
+        compatível com uma restrição de origens. Ele não constitui auditoria de todos os endpoints
+        de autenticação, nem demonstra por si só que qualquer outro problema no fluxo 2FA tenha
+        sido corrigido.
+      </p>
+
+      <h2>6. Divulgação coordenada e resposta da BugPay</h2>
+      <p>Os marcos documentados na comunicação do reporte foram:</p>
+      <ul>
+        <li><strong>06/11/2026:</strong> identificação e teste da leitura cross-origin no endpoint <code>password-login-2fa</code>.</li>
+        <li><strong>09/11/2026:</strong> confirmação da configuração reportada pela BugPay; o reporte passou por análise, aceite e etapa de reteste. A severidade foi alterada de <em>High</em> para <strong>Low</strong>.</li>
+        <li><strong>09/11/2026:</strong> reteste no navegador indicou restrição da origem permitida e bloqueio da leitura externa.</li>
+        <li><strong>18/11/2026:</strong> status do reporte alterado de <em>reteste</em> para <strong>concluído</strong>. A equipe autorizou expressamente mencionar o caso em artigos.</li>
+      </ul>
+      <p>
+        O reconhecimento do comportamento e o encerramento do reporte são fatos distintos de
+        uma confirmação de ATO. A classificação final <strong>Low</strong> é consistente com
+        a necessidade de delimitar o impacto às evidências reproduzidas.
+      </p>
+
+      <h2>7. Lições técnicas e medidas defensivas</h2>
+      <p>
+        A principal lição não é que toda API com <code>*</code> esteja vulnerável.
+        É que <strong>as permissões CORS devem ser avaliadas junto com os dados retornados,
+        o contexto de autenticação e os efeitos da operação</strong>.
+        Uma verificação técnica adequada deve responder:
+      </p>
+      <ul>
+        <li>A resposta foi realmente acessível ao JavaScript de uma origem externa?</li>
+        <li>A requisição dependia de cookies, token autenticado ou outro segredo não público?</li>
+        <li>O conteúdo retornado tinha valor sensível ou permitia uma ação indevida?</li>
+        <li>O resultado foi reproduzido com a mesma sessão e o mesmo desafio ao longo de todas as etapas?</li>
+      </ul>
+      <p>
+        Do lado defensivo, uma medida apropriada para endpoints que precisam atender somente
+        à interface oficial é uma <strong>allowlist explícita de origens confiáveis</strong>.
+        Isso deve vir acompanhado de autorização no servidor, controles contra abuso,
+        validação adequada dos desafios 2FA e proteção contra CSRF onde aplicável.
+        CORS não substitui autorização, nem funciona como defesa geral contra CSRF.
+      </p>
+
+      <h2>8. Conclusão</h2>
+      <p>
+        A pesquisa começou com uma hipótese sobre a leitura cross-origin de respostas de um fluxo
+        sensível. O teste confirmou que uma página externa conseguia ler o JSON retornado pela ação
+        inicial de 2FA. O reteste mostrou que esse mesmo acesso deixou de funcionar quando a
+        resposta passou a restringir a origem permitida.
+      </p>
+      <p>
+        O caso foi aceito e concluído pela BugPay, com severidade final <strong>Low</strong> e
+        autorização para divulgação. <strong>Não reivindico neste texto ATO, bypass de 2FA ou
+        roubo de tokens como impactos demonstrados.</strong> Registrar essas limitações é parte
+        da pesquisa: uma PoC útil não é apenas aquela que confirma uma hipótese, mas também
+        aquela que estabelece com precisão até onde vão as evidências.
+      </p>
+
+      <h2>Referências</h2>
+      <ul>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS" target="_blank" rel="noopener noreferrer">MDN — Cross-Origin Resource Sharing (CORS)</a></li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSNotSupportingCredentials" target="_blank" rel="noopener noreferrer">MDN — CORS wildcard e requisições com credenciais</a></li>
+        <li><a href="https://wstg.owasp.org/latest/4-Web_Application_Security_Testing/11-Client-side/07-Cross_Origin_Resource_Sharing/" target="_blank" rel="noopener noreferrer">OWASP WSTG — Testing Cross Origin Resource Sharing</a></li>
+      </ul>
+
+      <div class="note">
+        <strong>Nota de divulgação:</strong> este artigo descreve um caso histórico cujo
+        reporte foi concluído e cuja publicação foi autorizada pelo programa. Os exemplos
+        foram reduzidos e sanitizados. Não é um convite para testar sistemas de terceiros
+        sem autorização nem uma afirmação de que o comportamento antigo ainda exista.
+      </div>
+
+      <a class="back-link" href="../#writeups">← voltar aos write-ups</a>
+    </article>
+  </main>
+
+  <footer class="site-footer wrap">
+    <span>Poystick · Tarcísio Luchesi</span>
+    <span>Pesquisa publicada em 19/11/2026</span>
+  </footer>
+</body>
+</html>
