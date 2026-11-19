@@ -33,6 +33,13 @@ Independent security researcher focused on understanding how vulnerabilities ari
 
 Browse more reports and notes in **[research/](research/)**.
 
+## Research assumptions / Pressupostos de pesquisa
+
+- **[Manual reasoning / Raciocínio manual](pressupostos/#manual)** — assumptions formulated from direct observation, tested and documented with clear limitations.
+- **[AI-assisted reasoning / Raciocínio com apoio de IA](pressupostos/#ia)** — alternatives and counterarguments suggested with AI support, followed by independent technical validation.
+
+These pages distinguish hypotheses from confirmed security findings and clarify the role of human judgment in research.
+
 ## Technical focus
 
 - **Vulnerability classes:** XSS (reflected, stored, DOM), HTML Injection, CSRF, authorization/access-control issues, SQL injection, SSRF, and business-logic flaws.
