@@ -6,6 +6,8 @@
 
 ## Web Security Research & Proofs of Concept
 
+> Web security research portfolio featuring vulnerability analysis, CVEs, proof-of-concepts, WordPress security research, and penetration testing methodologies.
+
 **Tarcísio Luchesi (P0ystick)** · Web Application Security · Vulnerability Research · Penetration Testing
 
 Independent security researcher focused on understanding how vulnerabilities arise in real web applications, especially WordPress plugins. This repository is my public technical portfolio: source-to-sink analyses, reproducible write-ups, CTF research, and proof-of-concept code designed for controlled environments.
