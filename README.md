@@ -27,7 +27,7 @@ Independent security researcher focused on understanding how vulnerabilities ari
 | **[CVE-2025-15285 — interactive lab PoC](pocs/cve_2025_15285_interactive.py)** · [write-up](research/cve-2025-15285.html) | Python-based demonstration of missing authorization in SEO Flow by LupsOnline; the script restricts targets to local/private lab environments and asks for confirmation before state-changing actions. |
 | **[Icegram Collect 1.3.21 — input-to-sink review](research/icegram-collect-1.3.21-review-url-sem-escape.md)** | WordPress/PHP static analysis of unescaped `review_url`, including prerequisite capabilities and **explicit exploitation limitations**. |
 | **[Handlebars template research (CTF)](research/cve-2026-33938-handlebars-ctf.md)** | Tracing request data through an Express/Node.js template-processing flow in a controlled challenge. |
-| **[Black-box newsletter consent testing](research/black-box-newsletter-consent.html)** | A practical research note on form behavior and consent-related testing hypotheses. |
+| **[BugPay — CORS no fluxo 2FA](research/bugpay-cors-2fa-cross-origin.html)** | Caso real de leitura cross-origin, reteste após restrição de origem, classificação Low e divulgação autorizada; sem alegação de ATO demonstrado. |\n| **[Black-box newsletter consent testing](research/black-box-newsletter-consent.html)** | A practical research note on form behavior and consent-related testing hypotheses. |
 | **[Paytium XSS case study](research/paytium-5-0-3-5-0-5-xss.html)** | WordPress security research and version-comparison notes. |
 | **[Web testing methodology](methodology.html)** · **[WordPress methodology](wordpress-methodology.html)** | Reusable approaches to application testing and plugin analysis. |
 
