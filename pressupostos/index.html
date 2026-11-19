@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="description" content="Pressupostos e hipóteses de pesquisa em segurança web: raciocínio manual e raciocínio com apoio de inteligência artificial — Poystick.">
+  <title>Pressupostos de pesquisa — poystick</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0a0a0a;--surface:#111;--text:#e9e9e9;--muted:#aaa;--line:#242424;--red:#ff3434;--blue:#7a8cff}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.7 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+    a{color:inherit;text-decoration:none}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+    .wrap{width:min(820px,calc(100% - 40px));margin:auto}
+    .site-header{width:min(900px,calc(100% - 32px));margin:auto;min-height:72px;padding:16px 0;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--line)}
+    .logo{font-weight:700;font-size:18px;white-space:nowrap}.logo span{color:var(--red)}
+    nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px 20px;font-size:13px;color:var(--muted)}
+    nav a:hover,a.inline-link:hover{color:var(--red)}
+    .hero{padding:76px 0 40px;border-bottom:1px solid var(--line)}
+    .label{margin:0 0 18px;color:var(--blue);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+    h1{font-size:clamp(36px,7vw,64px);line-height:1.05;letter-spacing:-.05em;margin:0 0 22px}
+    .lead{max-width:730px;margin:0;color:#d2d2d2;font:18px/1.65 Inter,system-ui,sans-serif}
+    .disclaimer{margin:22px 0 0;padding:14px 18px;border-left:3px solid var(--blue);background:var(--surface);color:#b8b8b8;font:14px/1.65 Inter,system-ui,sans-serif}
+    .disclaimer strong{color:var(--text)}
+    .tabs{display:flex;flex-wrap:wrap;gap:10px;padding:32px 0 0;border-bottom:1px solid var(--line)}
+    .tab{appearance:none;cursor:pointer;border:1px solid var(--line);border-bottom:2px solid transparent;background:#111;color:#a2a2a2;padding:13px 18px;font:700 13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .tab:hover{color:#fff;border-color:#555}
+    .tab[aria-selected="true"]{color:#fff;border-color:var(--blue);border-bottom-color:var(--blue);background:#171722}
+    .panel{padding:44px 0 70px}
+    .panel[hidden]{display:none}
+    .panel h2{font-size:24px;line-height:1.3;margin:0 0 12px}
+    .panel .summary{max-width:740px;color:var(--muted);margin:0 0 28px;font:16px/1.75 Inter,system-ui,sans-serif}
+    .steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:28px 0 44px;list-style:none;padding:0;counter-reset:steps}
+    .steps li{counter-increment:steps;background:var(--surface);border:1px solid var(--line);padding:16px 18px;color:#bcbcbc}
+    .steps li::before{content:"0" counter(steps) " / ";color:var(--blue);font-weight:bold}
+    h3{font-size:16px;margin:0 0 12px;color:#eee}
+    .entry{padding:24px 0;border-top:1px solid var(--line)}
+    .entry p{margin:9px 0;color:#aaa;font:15px/1.75 Inter,system-ui,sans-serif}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .tag{padding:2px 8px;border:1px solid #353535;color:#aeb7fe;font-size:11px}
+    .entry a,.inline-link{color:#aab6ff;text-decoration:underline;text-underline-offset:4px}
+    .entry a:hover{color:#fff}
+    .template{margin-top:24px;padding:20px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--red)}
+    .template h3{margin-top:0}
+    .template p,.template li{font:14px/1.75 Inter,system-ui,sans-serif;color:#bcbcbc}
+    .template ul{margin:12px 0 0;padding-left:18px}
+    .footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding:28px 0 40px;color:#777;font-size:12px}
+    @media(max-width:620px){.site-header{align-items:flex-start;flex-direction:column;gap:12px}.site-header nav{justify-content:flex-start}.hero{padding:54px 0 34px}.steps{grid-template-columns:1fr}.tab{flex:1 1 160px}.footer{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="logo" href="../" aria-label="Poystick, página inicial">poystick<span>.</span></a>
+    <nav aria-label="Navegação principal">
+      <a href="../">início</a>
+      <a href="../#writeups">write-ups</a>
+      <a href="../methodology.html">metodologia</a>
+      <a href="https://github.com/TarcisioLuchesi/-web-security-research">repositório ↗</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <section class="hero">
+      <p class="label">research notebook / hipóteses</p>
+      <h1>Pressupostos de pesquisa</h1>
+      <p class="lead">Como formulo, questiono e testo hipóteses em segurança web: tanto por raciocínio próprio quanto com a IA como ferramenta de análise, contraste e aprendizagem.</p>
+      <p class="disclaimer"><strong>Critério de evidência:</strong> um pressuposto não é uma vulnerabilidade confirmada. O que foi observado, reproduzido em laboratório e efetivamente demonstrado deve ser distinguido de possibilidades ainda não verificadas. O uso de IA não substitui essa validação.</p>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Origem do raciocínio">
+      <button id="tab-manual" class="tab" type="button" role="tab" aria-controls="manual" aria-selected="true" tabindex="0" data-tab="manual">01 / Raciocínio manual</button>
+      <button id="tab-ia" class="tab" type="button" role="tab" aria-controls="ia" aria-selected="false" tabindex="-1" data-tab="ia">02 / Raciocínio com IA</button>
+    </div>
+
+    <section id="manual" class="panel" role="tabpanel" aria-labelledby="tab-manual" tabindex="0">
+      <h2>Pressupostos elaborados manualmente</h2>
+      <p class="summary">A investigação começa por uma observação própria: uma entrada de usuário, uma fronteira de confiança ou um comportamento inesperado. A partir disso, proponho um mecanismo, tento refutá-lo e registro exatamente o que o experimento demonstrou.</p>
+      <ol class="steps">
+        <li>Observar a funcionalidade e o comportamento real.</li>
+        <li>Formular uma hipótese causal verificável.</li>
+        <li>Projetar um teste controlado e possíveis contraexemplos.</li>
+        <li>Registrar evidências, limites e conclusão.</li>
+      </ol>
+      <h3>Exemplo de linha de pesquisa</h3>
+      <article class="entry">
+        <div class="meta"><span class="tag">HTML Injection / CSRF</span><span class="tag">Hipótese testada em cenário local</span></div>
+        <h3>HTML Injection e a confiança no cabeçalho Origin</h3>
+        <p><strong>Pergunta:</strong> se um formulário HTML for injetado dentro de uma aplicação, o navegador pode enviar uma ação de mudança de estado com a origem da própria aplicação, mesmo quando um formulário externo seria bloqueado?</p>
+        <p><strong>Raciocínio:</strong> uma defesa baseada apenas em comparar o cabeçalho Origin não distingue necessariamente a interface legítima de um formulário malicioso inserido no mesmo documento.</p>
+        <p><strong>Limite:</strong> o efeito depende da ação disponível, das permissões da vítima e de outras proteções. Não é prova automática de tomada de conta. Um cenário local não confirma a existência do problema em qualquer aplicação real.</p>
+        <p>Leitura relacionada: <a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener noreferrer">OWASP Web Security Testing Guide</a>.</p>
+      </article>
+      <div class="template">
+        <h3>O que documento em cada hipótese manual</h3>
+        <ul>
+          <li>Observação original e contexto autorizado.</li>
+          <li>Premissas, mecanismo proposto e resultado esperado.</li>
+          <li>Procedimento de teste e evidências reproduzíveis.</li>
+          <li>Contraexemplos, resultado e grau de confiança.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="ia" class="panel" role="tabpanel" aria-labelledby="tab-ia" tabindex="0" hidden>
+      <h2>Pressupostos com apoio da inteligência artificial</h2>
+      <p class="summary">Eu defino o problema e uso a IA para explorar alternativas, revisar fluxos de código e apontar premissas que posso ter ignorado. O objetivo é fortalecer o pensamento crítico, não terceirizar conclusões: cada sugestão precisa ser confrontada com o código e com testes próprios.</p>
+      <ol class="steps">
+        <li>Descrever o comportamento e a questão técnica.</li>
+        <li>Solicitar hipóteses alternativas e objeções à IA.</li>
+        <li>Verificar manualmente código, requisições e condições.</li>
+        <li>Separar sugestões não comprovadas de evidência validada.</li>
+      </ol>
+      <h3>Exemplos de investigação assistida</h3>
+      <article class="entry">
+        <div class="meta"><span class="tag">CORS / 2FA</span><span class="tag">Write-up publicado</span></div>
+        <h3>Questionar o impacto de uma resposta cross-origin</h3>
+        <p>Em vez de presumir que uma configuração de CORS permissiva resulta em comprometimento de conta, a análise considera o que a resposta expõe, a autenticação exigida, o fluxo real do 2FA e os limites de impacto. As hipóteses são confrontadas com o reteste.</p>
+        <p><a href="../research/bugpay-cors-2fa-cross-origin.html">Ler análise e reteste sobre CORS em endpoint 2FA →</a></p>
+      </article>
+      <article class="entry">
+        <div class="meta"><span class="tag">PHP / XSS</span><span class="tag">Write-up publicado</span></div>
+        <h3>Revisar a cadeia de entrada até o ponto de saída</h3>
+        <p>A IA pode sugerir caminhos de source-to-sink e variações de normalização de parâmetros. A conclusão, porém, depende de localizar o comportamento no código, confirmar o contexto de saída e reproduzir o resultado.</p>
+        <p><a href="../research/xss-refletido-php-waf-dotless-base64.html">Ler estudo sobre nomes de parâmetros e XSS refletido →</a></p>
+      </article>
+      <div class="template">
+        <h3>O que documento em cada hipótese assistida por IA</h3>
+        <ul>
+          <li>Questão inicial formulada pelo pesquisador.</li>
+          <li>Qual sugestão veio da IA e qual raciocínio foi meu.</li>
+          <li>Fontes, trechos de código e experimentos verificados sem depender da resposta da IA.</li>
+          <li>Hipóteses rejeitadas, limitações e conclusão técnica.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <footer class="footer wrap"><span>Poystick · Tarcísio Luchesi</span><span>Pesquisas em ambientes próprios ou autorizados</span></footer>
+  <script>
+    (() => {
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      const panels = new Map(Array.from(document.querySelectorAll('[role="tabpanel"]')).map(panel => [panel.id, panel]));
+      function activate(id, moveFocus = false) {
+        if (!panels.has(id)) id = 'manual';
+        tabs.forEach(tab => {
+          const selected = tab.dataset.tab === id;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          if (selected && moveFocus) tab.focus();
+        });
+        panels.forEach((panel, name) => { panel.hidden = name !== id; });
+      }
+      function fromHash() { activate(location.hash === '#ia' ? 'ia' : 'manual'); }
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+          const id = tab.dataset.tab;
+          if (location.hash !== '#' + id) location.hash = id;
+          activate(id);
+        });
+        tab.addEventListener('keydown', event => {
+          let next = index;
+          if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+          else if (event.key === 'Home') next = 0;
+          else if (event.key === 'End') next = tabs.length - 1;
+          else return;
+          event.preventDefault();
+          const id = tabs[next].dataset.tab;
+          location.hash = id;
+          activate(id, true);
+        });
+      });
+      window.addEventListener('hashchange', fromHash);
+      fromHash();
+    })();
+  </script>
+</body>
+</html>
