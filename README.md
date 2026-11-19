@@ -1,4 +1,10 @@
-# P0ystick — Web Security Research & Proofs of Concept
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/profile-banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/profile-banner-light.svg">
+  <img src="assets/profile-banner-dark.svg" alt="P0ystick — Tarcísio Luchesi, web security researcher" width="100%">
+</picture>
+
+## Web Security Research & Proofs of Concept
 
 **Tarcísio Luchesi (P0ystick)** · Web Application Security · Vulnerability Research · Penetration Testing
 
@@ -56,3 +62,7 @@ Sou **Tarcísio Luchesi (P0ystick)**, pesquisador independente de segurança de 
 Este repositório reúne meu **portfólio técnico**, incluindo estudos de caso, metodologias de teste e PoCs para ambientes controlados. Minha contribuição para o **[OWASP Web Security Testing Guide foi mesclada (#1720)](https://github.com/OWASP/wstg/pull/1720)**.
 
 **Tenho interesse em oportunidades de trabalho e colaboração em pentest web, Application Security e pesquisa de vulnerabilidades.** Meu contato profissional pode ser iniciado pelo [GitHub](https://github.com/TarcisioLuchesi) ou [X](https://x.com/P0ystick).
+
+### Professional profile
+
+A bilingual, recruiter-oriented [GitHub profile README](PROFILE_README_TEMPLATE.md) is ready to publish in the public `TarcisioLuchesi/TarcisioLuchesi` profile repository. The linked banners are maintained in [assets/](assets/).
