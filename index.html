@@ -40,6 +40,7 @@ a{color:inherit;text-decoration:none}
   width:min(900px,calc(100% - 32px));
   margin:0 auto;
   min-height:72px;
+  padding:14px 0;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -55,7 +56,9 @@ a{color:inherit;text-decoration:none}
 
 nav{
   display:flex;
-  gap:22px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:8px 18px;
   color:var(--muted);
   font-size:13px;
 }
@@ -337,6 +340,7 @@ pre{
       <a href="#pocs">PoCs</a>
       <a href="methodology.html">metodologia de estudo</a>
       <a href="wordpress-methodology.html">metodologia WordPress</a>
+      <a href="pressupostos/">pressupostos</a>
       <a href="#filosofia">filosofia</a>
       <a href="#sobre">sobre</a>
       <a href="https://github.com/TarcisioLuchesi">github ↗</a>
@@ -403,6 +407,33 @@ pre{
           </p>
         </div>
         <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+    </section>
+
+    <section id="pressupostos" class="section">
+      <div class="section-title">
+        <h2>Pressupostos e hipóteses</h2>
+        <span>caderno de pesquisa</span>
+      </div>
+      <p class="method-note" style="margin:0 0 22px;max-width:700px">
+        Registro como uma observação se torna uma hipótese verificável. A origem do raciocínio
+        é identificada com clareza, sem confundir ideias com vulnerabilidades confirmadas.
+      </p>
+      <a class="post-row" href="pressupostos/#manual">
+        <div>
+          <p class="post-date">01 / RACIOCÍNIO PRÓPRIO</p>
+          <h3>Pressupostos manuais</h3>
+          <p>Observações, hipóteses, testes controlados e limites do que foi demonstrado.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="post-row" href="pressupostos/#ia">
+        <div>
+          <p class="post-date">02 / RACIOCÍNIO ASSISTIDO</p>
+          <h3>Pressupostos com ajuda da IA</h3>
+          <p>A IA ajuda a explorar alternativas e revisar premissas; a conclusão depende de validação independente.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
     </section>
 
