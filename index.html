@@ -368,12 +368,12 @@ pre{
 
       <div class="origin-filter" aria-label="Filtrar publicações por autoria da vulnerabilidade">
         <button type="button" class="active" data-origin-filter="all">Todas</button>
-        <button type="button" data-origin-filter="own">CVEs próprias</button>
+        <button type="button" data-origin-filter="own">Pesquisas próprias</button>
         <button type="button" data-origin-filter="third-party">Terceiros</button>
         <button type="button" data-origin-filter="educational">Educacionais</button>
       </div>
       <p class="method-note">
-        CVEs próprias = vulnerabilidades atribuídas a Tarcísio Luchesi (Poystick).
+        Pesquisas próprias = análises, relatos e CVEs atribuídos a Tarcísio Luchesi (Poystick).
         Terceiros = vulnerabilidades descobertas por outros hunters. Educacionais = fundamentos e metodologias, sem atribuição de falha.
       </p>
     </section>
@@ -409,8 +409,20 @@ pre{
     <section id="writeups" class="section">
       <div class="section-title">
         <h2>Write-ups</h2>
-        <span>07 publicados</span>
+        <span>08 publicados</span>
       </div>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/bugpay-cors-2fa-cross-origin.html">
+        <div>
+          <p class="post-date">2026-11-19 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Pesquisa própria · Low</span></p>
+          <h3>BugPay — CORS permissivo em endpoint 2FA: análise e reteste</h3>
+          <p>
+            Leitura cross-origin no início do desafio 2FA, limites de impacto, reteste com origem
+            restrita e conclusão do reporte autorizado para divulgação.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
 
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/xss-refletido-php-waf-dotless-base64.html">
         <div>
