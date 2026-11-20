@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CVE-2026-61957: write-up de Tarcísio Luchesi (Poystick) sobre XSS refletido no miniOrange OTP Verification até 5.5.1, normalização de chaves PHP e payload dotless em Base64.">
+  <meta name="description" content="CVE-2026-61957: research on reflected XSS involving PHP parameter name normalization, dotless Base64 payloads, impact limits, and fixes.">
   <meta name="theme-color" content="#0a0a0a">
   <title>CVE-2026-61957 — XSS refletido no miniOrange OTP Verification — poystick</title>
   <style>
@@ -43,17 +43,17 @@
   <nav>
     <a href="../#writeups">write-ups</a>
     <a href="../#pocs">PoCs</a>
-    <a href="../methodology.html">metodologia</a>
-    <a href="../#sobre">sobre</a>
+    <a href="../methodology.html">methodology</a>
+    <a href="../#sobre">about</a>
     <a href="https://github.com/TarcisioLuchesi" target="_blank" rel="noopener noreferrer">github ↗</a>
   </nav>
 </header>
 
 <main class="article-shell">
 <section class="article-hero">
-  <div class="kicker">CVE-2026-61957 / WordPress / Reflected XSS</div>
-  <h1>CVE-2026-61957 — XSS refletido no miniOrange OTP Verification: PHP e payload dotless</h1>
-  <p class="hero-copy">Como investiguei a reflexão de chaves GET em HTML e cheguei a uma alternativa com Base64 para evitar caracteres que o PHP transforma ao processar parâmetros.</p>
+  <div class="kicker">CVE-2026-61957 / WordPress / reflected XSS</div>
+  <h1>CVE-2026-61957 — Reflected XSS in miniOrange OTP Verification: PHP and dotless payloads</h1>
+  <p class="hero-copy">Investigating GET parameter-name reflection in HTML and Base64 encoding to avoid characters transformed by PHP parameter parsing.</p>
   <div class="article-meta">
     <span>08 nov 2026 · write-up</span><span>CVE-2026-61957</span><span>PHP</span><span>WordPress</span><span>CWE-79</span><span>CVSS 7.1</span>
   </div>
@@ -63,80 +63,49 @@
   </div>
 </section>
 <article class="article">
-  <p>Durante uma pesquisa no plugin <strong>miniOrange OTP Verification</strong> para WordPress, encontrei um comportamento interessante: a interface devolvia nomes de parâmetros GET para a resposta HTML. O detalhe é que esses nomes, quando inseridos sem escape no contexto de marcação, também podem se tornar uma entrada para XSS refletido.</p>
-  <p>O que mais chamou minha atenção não foi apenas a reflexão. Foi o caminho entre o navegador e o PHP. Eu precisava entender o que acontecia com os caracteres do payload quando eles eram usados como <strong>nome do parâmetro</strong>, e não como valor.</p>
-
-  <h2>Identificação e divulgação responsável</h2>
-  <p>A vulnerabilidade que reportei recebeu o identificador <strong>CVE-2026-61957</strong>. A Patchstack registrou meu crédito como <strong>Tarcísio Luchesi (Poystick)</strong>, com reporte em 12 de junho de 2026 e publicação em 27 de julho de 2026. O problema afeta o <strong>miniOrange OTP Verification até a versão 5.5.1</strong>; a correção está disponível a partir da <strong>5.5.2</strong>.</p>
-  <p>O registro classifica a falha como <strong>CWE-79, XSS refletido não autenticado</strong>, com pontuação CVSS 3.1 de <strong>7.1 (alta)</strong> e necessidade de interação da vítima para exploração. A descrição oficial é resumida; o mecanismo detalhado abaixo é apresentado com base na minha análise técnica.</p>
-  <p>Referências públicas: <a href="https://patchstack.com/database/wordpress/plugin/miniorange-otp-verification/vulnerability/wordpress-miniorange-otp-verification-plugin-5-5-1-cross-site-scripting-xss-vulnerability" target="_blank" rel="noopener noreferrer">Patchstack</a> · <a href="https://www.cve.org/CVERecord?id=CVE-2026-61957" target="_blank" rel="noopener noreferrer">CVE Record</a>.</p>
-
-  <h2>O ponto de entrada: a chave GET</h2>
-  <p>Em testes mais comuns de XSS, normalmente controlamos um valor, como <code>?q=teste</code>. Neste caso, a hipótese era diferente: o nome do parâmetro poderia chegar ao HTML sem codificação contextual adequada. Por isso, olhar apenas para <code>$_GET['q']</code> não era suficiente; eu precisava observar como a aplicação recuperava e exibia as próprias chaves.</p>
-  <pre><code>GET /pagina-de-teste?chave_controlada=1 HTTP/1.1
+<p>During my research on the <strong>miniOrange OTP Verification</strong> WordPress plugin, I found an interesting behavior: GET parameter <em>names</em> were reflected into the HTML response. When those names are printed into markup without contextual escaping, they can also become an entry point for reflected XSS.</p>
+<p>What made this investigation interesting was the path between the browser and PHP. I needed to understand what happens to payload characters when they are used as <strong>parameter names</strong>, not parameter values.</p>
+<h2>Identification and responsible disclosure</h2>
+<p>The vulnerability I reported was assigned <strong>CVE-2026-61957</strong>. Patchstack credits me as <strong>Tarcísio Luchesi (Poystick)</strong>, with a report date of June 12, 2026 and publication on July 27, 2026. It affects miniOrange OTP Verification through version <strong>5.5.1</strong> and was fixed in <strong>5.5.2</strong>.</p>
+<p>The published classification is CWE-79, unauthenticated reflected XSS, with a CVSS 3.1 score of 7.1 (High) and victim interaction required. The detailed analysis here is my technical interpretation; consult the <a href="https://patchstack.com/database">Patchstack vulnerability database</a> and <a href="https://www.cve.org">CVE records</a> for the original record.</p>
+<h2>The entry point: a GET parameter name</h2>
+<p>In typical XSS tests, we control a value such as <code>?q=test</code>. Here the hypothesis was that a <em>key</em> could reach HTML without contextual encoding. Inspecting only <code>$_GET['q']</code> would not be sufficient: the application might retrieve and display the keys themselves.</p>
+<pre><code>GET /pagina-de-teste?chave_controlada=1 HTTP/1.1
 Host: laboratorio.example</code></pre>
-  <p>Se <code>chave_controlada</code> aparece em uma resposta HTML, o próximo passo é verificar <em>onde</em> ela aparece: em texto, em um atributo, dentro de JavaScript ou em outro contexto. É essa posição que determina se a reflexão é perigosa e qual forma de escape seria necessária.</p>
-
-  <h2>O obstáculo: a normalização de nomes no PHP</h2>
-  <p>O PHP possui um comportamento específico ao interpretar nomes de parâmetros externos. Caracteres como pontos e espaços podem ser convertidos para underscores. Colchetes, por sua vez, participam da sintaxe de arrays e também afetam como a chave é interpretada.</p>
-  <pre><code>// Exemplo conceitual de interpretação de chaves:
+<p>Whenever a user-controlled key appears in HTML, check its actual output context: text, attribute, JavaScript, or another context. That determines whether the reflection is dangerous and which output encoding is needed.</p>
+<h2>The obstacle: PHP parameter-name normalization</h2>
+<p>PHP interprets names of external parameters in a particular way. Dots and spaces can become underscores; square brackets also influence array syntax and key parsing.</p>
+<pre><code>// Exemplo conceitual de interpretação de chaves:
 ?nome.campo=1     → nome_campo
 ?nome%20campo=1   → nome_campo</code></pre>
-  <p>Isso afeta diretamente expressões JavaScript que contêm pontos. Se eu colocar uma expressão como <code>document.cookie</code> em uma chave que passa pela normalização do PHP, o ponto pode deixar de existir. O JavaScript que chega ao navegador já não é a mesma expressão que eu havia planejado.</p>
-  <p>Esse detalhe também exige cuidado na análise: nem toda aplicação usa a chave normalizada para gerar a resposta. É necessário observar o HTML efetivamente devolvido, porque um sistema também pode refletir a query string original.</p>
-
-  <h2>Minha abordagem: payload sem pontos (dotless)</h2>
-  <p>Em vez de insistir na notação tradicional de propriedades do JavaScript, trabalhei com uma representação codificada. A ideia foi manter a expressão original dentro de uma string Base64 e reconstruí-la apenas no navegador, com <code>atob()</code> e o construtor <code>Function</code>.</p>
-  <p>Assim, a expressão sensível aos caracteres do nome do parâmetro deixa de aparecer diretamente na chave GET. O navegador faz a decodificação depois que a resposta já foi interpretada como código JavaScript.</p>
-  <div class="flow">Nome de parâmetro controlado
-   ↓
-Parser PHP / normalização de chaves
-   ↓
-Reflexão no HTML sem escape contextual
-   ↓
-JavaScript no navegador
-   ↓
-atob() → código reconstruído em memória
-   ↓
-Function() → execução no contexto da página</div>
-
-  <h2>PoC simplificada para compreender a técnica</h2>
-  <p>Para mostrar o mecanismo sem publicar uma rotina de coleta de sessão, este é um exemplo autocontido e inofensivo, adequado a um console ou laboratório próprio:</p>
-  <pre><code>Function(atob('YWxlcnQoMSk'))()</code></pre>
-  <p>A string decodificada corresponde a:</p>
-  <pre><code>alert(1)</code></pre>
-  <p>O Base64 desse exemplo foi escrito sem o caractere final de padding <code>=</code>; a função <code>atob()</code> aceita essa forma neste caso. O objetivo não é dizer que todo payload desse tipo funciona em qualquer aplicação, mas demonstrar por que uma representação codificada pode evitar certos caracteres na superfície de entrada.</p>
-  <div class="note"><strong>Nota sobre a evidência:</strong> o relatório original descreve uma PoC com chamada de rede e acesso a <code>document.cookie</code>. Nesta publicação, preservei o mecanismo técnico, mas substituí a rotina de exfiltração por uma demonstração local. A publicação não inclui domínio real de teste, sessão ou identificador de Webhook.</div>
-
-  <h2>Por que isso pode ultrapassar uma filtragem?</h2>
-  <p>Uma filtragem que dependa de detectar padrões literais como certas propriedades do JavaScript pode não enxergar o conteúdo depois de codificado. O mesmo raciocínio vale para regras de WAF que tratam alguns caracteres ou assinaturas isoladamente. No entanto, <strong>um payload ter uma forma diferente não comprova, por si só, um bypass universal de WAF</strong>.</p>
-  <p>Para afirmar que contornei uma regra específica, preciso comparar as respostas do ambiente: o bloqueio do payload original, a aceitação da variação e, principalmente, a execução real no navegador. É a evidência, não apenas a string, que determina a conclusão.</p>
-
-  <h2>Impacto e limites do que a PoC demonstra</h2>
-  <p>Uma XSS refletida explorável permite executar JavaScript na origem da aplicação quando a vítima acessa uma URL preparada. Isso pode viabilizar interações indevidas com a interface e acesso a informações que estejam disponíveis ao JavaScript naquela origem.</p>
-  <p>No cenário descrito no relatório, a leitura de <code>document.cookie</code> foi considerada como possibilidade de impacto. Porém, cookies protegidos com <code>HttpOnly</code> não ficam acessíveis por essa API. Além disso, ler um cookie não equivale automaticamente a demonstrar <em>Account Takeover</em>. Uma conclusão desse tipo requer evidências adicionais do mecanismo de sessão e do contexto de exploração.</p>
-  <p>Outra distinção importante: se a reflexão ocorre em uma tela administrativa, o alcance do ataque depende de quem pode acessar essa tela, de como a requisição é construída e das proteções efetivas da aplicação, incluindo CSP.</p>
-
-  <h2>Como corrigir o problema</h2>
-  <p>A correção deve acontecer no contexto de saída, impedindo que um nome de parâmetro controlado seja interpretado como HTML ou JavaScript. Em WordPress, eu começaria pelos pontos que renderizam os dados:</p>
-  <ul>
-    <li><code>esc_html()</code> para conteúdo exibido como texto HTML;</li>
-    <li><code>esc_attr()</code> quando o dado precisa aparecer em um atributo HTML;</li>
-    <li><code>esc_url()</code> quando a saída é uma URL;</li>
-    <li>validação explícita dos nomes de parâmetros esperados, em vez de refletir chaves arbitrárias.</li>
-  </ul>
-  <pre><code>// Exemplo para exibição de texto HTML em WordPress
+<p>For example, JavaScript that relies on <code>document.cookie</code> may be altered if the dot is normalized while used as a parameter name. The browser may receive a different JavaScript expression from the one originally sent. This must be checked against the actual HTML response: some applications reflect the raw query string instead of normalized PHP keys.</p>
+<h2>My approach: a dotless encoded payload</h2>
+<p>I explored keeping the original JavaScript expression encoded as Base64, then reconstructing it in the browser with <code>atob()</code> and the <code>Function</code> constructor. This avoids placing a dot-sensitive expression directly into the GET parameter name.</p>
+<div class="flow">Controlled parameter name → PHP parsing and key normalization → unescaped HTML reflection → browser JavaScript → atob() decoding → Function() reconstruction → execution in the page context</div>
+<h2>Simplified PoC explaining the technique</h2>
+<p>The following self-contained example is suitable for a console or local test. It demonstrates the mechanism without publishing a session-collection routine:</p>
+<pre><code>Function(atob('YWxlcnQoMSk'))()</code></pre>
+<p>The decoded string represents:</p>
+<pre><code>alert(1)</code></pre>
+<p>The Base64 sample omits final <code>=</code> padding, which <code>atob()</code> accepts in this case. This does not mean that every such payload works in every application. It illustrates why encoding can avoid particular characters in the input representation.</p>
+<p><strong>Evidence note:</strong> The original report describes a proof of concept involving a network request and access to <code>document.cookie</code>. This publication replaces the exfiltration routine with a local demonstration and does not include session data, a real test target, or webhook identifiers.</p>
+<h2>Why can this affect pattern-based filters?</h2>
+<p>A filter that looks only for literal JavaScript signatures may not recognize the same content after encoding. Similar reasoning applies to WAF rules relying on isolated characters or signatures. But a differently shaped payload is not proof of a <em>universal WAF bypass</em>. To claim bypass of a specific rule, compare the blocked original, accepted variation, and actual browser execution in the same authorized environment.</p>
+<h2>Impact and limitations</h2>
+<p>Exploitable reflected XSS can allow JavaScript to run in the application's origin when a victim opens a crafted URL. This could enable unauthorized interactions or access to origin data exposed to JavaScript. However, <code>HttpOnly</code> cookies are not readable through <code>document.cookie</code>, and reading a cookie is not itself proof of account takeover.</p>
+<p>Any claim of account compromise requires additional evidence about session behavior and exploit context. If the reflection occurs on an administrative screen, its reach also depends on access requirements, URL handling, CSP, and other defenses.</p>
+<h2>How to fix it</h2>
+<p>Prevent controlled parameter names from being interpreted as HTML or JavaScript at the output. In WordPress, use <code>esc_html()</code> for HTML text, <code>esc_attr()</code> for attributes, <code>esc_url()</code> for URLs, and explicit allowlisting of expected parameter names rather than reflecting arbitrary keys.</p>
+<pre><code>// Exemplo para exibição de texto HTML em WordPress
 echo esc_html($nome_do_parametro);</code></pre>
-  <p>Uma <em>Content Security Policy</em> restritiva pode acrescentar defesa em profundidade, mas não substitui escape contextual e validação na aplicação.</p>
-
-  <h2>O que levei dessa pesquisa</h2>
-  <p>O que eu achei mais interessante nesse caso foi perceber que o nome de um parâmetro também pode ser uma superfície de ataque. A investigação não terminou quando um payload tradicional deixou de funcionar. Eu precisei seguir a transformação da entrada pelo PHP, entender quais caracteres se perdiam e pensar em uma maneira de preservar a lógica JavaScript até a etapa de execução.</p>
-  <p>Esse é um aprendizado que tento aplicar nos meus testes: antes de mudar aleatoriamente um payload, entender o parser, a representação dos dados e o contexto onde eles serão usados. Foi essa diferença que tornou a análise interessante para mim.</p>
-
-  <div class="note"><strong>Registro e correção confirmados:</strong> CVE-2026-61957 · miniOrange OTP Verification ≤ 5.5.1 · corrigido na versão 5.5.2 · CVSS 3.1: 7.1. Crédito público: Tarcísio Luchesi (Poystick), programa de Bug Bounty da Patchstack. Consulte o <a href="https://patchstack.com/database/wordpress/plugin/miniorange-otp-verification/vulnerability/wordpress-miniorange-otp-verification-plugin-5-5-1-cross-site-scripting-xss-vulnerability" target="_blank" rel="noopener noreferrer">registro da vulnerabilidade na Patchstack</a>.</div>
-  <a class="back-link" href="../#writeups">← voltar aos write-ups</a>
+<p>A restrictive Content Security Policy can provide defense in depth, but does not replace contextual escaping and application-level validation.</p>
+<h2>What I learned</h2>
+<p>A parameter <em>name</em> can be an attack surface. Instead of changing payloads randomly when a traditional expression failed, I traced how PHP transformed the input, identified which characters were lost, and investigated ways to preserve its intended meaning until browser execution. Understanding the parser, representation, and output context was more useful than memorizing signatures.</p>
+<p><strong>Record:</strong> CVE-2026-61957 · miniOrange OTP Verification ≤ 5.5.1 · fixed in 5.5.2 · CVSS 3.1: 7.1. Public researcher credit: Tarcísio Luchesi (Poystick), Patchstack Bug Bounty program.</p>
+<a class="back-link" href="../#writeups">← back to write-ups</a>
 </article>
 </main>
 <footer class="site-footer"><span>poystick / Tarcísio Luchesi</span><span>CVE-2026-61957 · miniOrange OTP Verification</span></footer>
+  <script src="../assets/i18n.js" defer></script>
 </body>
 </html>
