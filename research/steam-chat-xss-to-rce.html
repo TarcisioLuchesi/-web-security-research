@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Do XSS ao RCE no Steam Chat: análise didática da cadeia envolvendo React, BBCode, CEF, custom URI e uma ponte privilegiada.">
+  <meta name="description" content="Educational analysis of the Steam Chat XSS-to-RCE chain involving React, BBCode, CEF, custom URI handlers and a privileged native bridge.">
   <meta name="theme-color" content="#0a0a0a">
   <title>Do XSS ao RCE no Steam Chat — poystick</title>
   <style>
@@ -38,9 +38,9 @@ pre{overflow:auto;margin:20px 0 28px;padding:18px;background:#0e0e0e;border:1px 
     <nav>
       <a href="../#writeups">write-ups</a>
       <a href="../#pocs">PoCs</a>
-      <a href="../methodology.html">metodologia de estudo</a>
-      <a href="../wordpress-methodology.html">metodologia WordPress</a>
-      <a href="../#sobre">sobre</a>
+      <a href="../methodology.html">study methodology</a>
+      <a href="../wordpress-methodology.html">WordPress methodology</a>
+      <a href="../#sobre">about</a>
       <a href="https://github.com/TarcisioLuchesi">github ↗</a>
     </nav>
   </header>
@@ -48,161 +48,49 @@ pre{overflow:auto;margin:20px 0 28px;padding:18px;background:#0e0e0e;border:1px 
   <main class="article-shell">
     <section class="article-hero">
       <div class="kicker">web / desktop / exploit chain</div>
-      <h1>Do XSS ao RCE no Steam Chat</h1>
-      <p class="hero-copy">Uma leitura didática da cadeia envolvendo React, BBCode, OEmbed, CEF, custom URI, mudança de privilégio e execução nativa.</p>
+      <h1>From XSS to RCE in Steam Chat</h1>
+      <p class="hero-copy">An educational analysis of a chain involving React, BBCode, OEmbed, CEF, custom URI handlers, privilege boundaries, and native execution.</p>
       <div class="article-meta">
         <span>React</span><span>BBCode</span><span>CEF</span><span>XSS</span><span>Custom URI</span><span>RCE</span>
       </div>
       <div class="article-meta" aria-label="Autoria e validação">
-        <span>Artigo criado com IA</span>
-        <span>Conteúdo técnico revisado e validado por Tarcísio Luchesi (Poystick)</span>
-        <span>Material didático baseado em relatório público de terceiro</span>
+        <span>Article created with AI</span>
+        <span>Technical content reviewed and validated by Tarcísio Luchesi (Poystick)</span>
+        <span>Educational material based on a public third-party report</span>
       </div>
     </section>
 
     <article class="article">
-      <div class="note">
-        <strong>Nota:</strong> os trechos PHP deste artigo são exemplos didáticos criados para explicar a causa raiz. Eles não são código-fonte do Steam. A vulnerabilidade original não é atribuída a mim; aqui eu estudo, reconstruo conceitualmente e valido o entendimento técnico da cadeia.<br><br>
-        <strong>Referência original:</strong> <a href="https://hackerone.com/reports/409850" target="_blank" rel="noopener noreferrer">HackerOne Report #409850 ↗</a>
-      </div>
-
-      <p>
-        O ponto mais interessante desse caso é que o pesquisador não encontrou uma linha simples do tipo
-        <code>entrada → system() → RCE</code>. O impacto surgiu do encadeamento de várias capacidades menores:
-        uma entrada controlável, transformação em link, protocolos especiais, um navegador embutido e uma
-        ponte privilegiada capaz de alcançar o sistema operacional.
-      </p>
-
-      <div class="flow">entrada controlada
-        ↓
-React / BBCode / OEmbed
-        ↓
-URL controlada
-        ↓
-CEF
-        ↓
-custom URI
-        ↓
-Steam Web Helper
-        ↓
-operação privilegiada
-        ↓
-Windows
-        ↓
-RCE</div>
-
-      <h2>1. Primeiro: entender a arquitetura</h2>
-      <p>
-        O chat do Steam era uma aplicação web executada dentro do aplicativo desktop usando uma versão
-        personalizada e restrita do Chrome Embedded Framework (CEF). A interface usava React, mas precisava
-        conversar com partes nativas do Steam por mecanismos como <code>postMessage</code>, WebSocket local
-        e outras interfaces internas.
-      </p>
-      <p>
-        Isso cria uma fronteira importante: JavaScript dentro do CEF não deveria possuir, por padrão, o
-        mesmo privilégio do processo nativo. Para transformar uma falha web em RCE, o pesquisador precisava
-        encontrar alguma ponte entre esses dois mundos.
-      </p>
-
-      <div class="flow">React / JavaScript
-        ↓
-CEF
-        ↓
-[ trust boundary ]
-        ↓
-Steam Web Helper
-        ↓
-Windows</div>
-
-      <h2>2. Por que React reduzia os XSS triviais?</h2>
-      <p>
-        React normalmente escapa valores renderizados como texto. Isso significa que uma entrada colocada
-        diretamente entre chaves em JSX não vira automaticamente HTML executável.
-      </p>
-
-      <pre><code>function Profile({ username }) {
+<div class="note"><strong>Educational note:</strong> The PHP snippets in this article are illustrative examples, not Steam source code. The underlying vulnerability belongs to the original third-party researcher. This article was created with AI and technically reviewed by Tarcísio Luchesi (Poystick). <a href="https://hackerone.com/reports/409850" target="_blank" rel="noopener noreferrer">Original HackerOne report #409850 ↗</a></div>
+<p>The important insight is that there was no single <code>input → system() → RCE</code> bug. Impact came from chaining smaller capabilities: controllable input, link transformation, special protocols, an embedded browser, and a privileged bridge able to reach the operating system.</p>
+<div class="flow">Controlled input → React / BBCode / OEmbed → controllable URL → CEF → custom URI → Steam Web Helper → privileged native operation → Windows → RCE</div>
+<h2>1. Understanding the architecture</h2>
+<p>Steam Chat ran a web interface inside the desktop client using a customized Chrome Embedded Framework (CEF). The React UI communicated with native Steam components through mechanisms including <code>postMessage</code>, a local WebSocket, and internal interfaces. JavaScript inside CEF should not automatically enjoy the privileges of the native application. The researcher therefore sought a bridge between those contexts.</p>
+<h2>2. Why React reduced trivial XSS</h2>
+<p>React normally escapes values rendered as text. In JSX, putting a user-controlled username inside braces does not automatically transform tag-like characters into active HTML:</p><pre><code>function Profile({ username }) {
     return &lt;div&gt;{username}&lt;/div&gt;;
 }</code></pre>
-
-      <p>
-        Se <code>username</code> contiver uma string parecida com uma tag HTML, o comportamento esperado é
-        tratá-la como texto, em vez de transformá-la automaticamente em um novo elemento DOM. Por isso o
-        pesquisador não ficou procurando apenas o padrão clássico de “fechar a tag e inserir &lt;script&gt;”.
-      </p>
-
-      <h2>3. React não elimina XSS</h2>
-      <p>
-        A proteção automática do React não torna seguras todas as APIs do navegador. Existem sinks e
-        contextos que continuam exigindo validação específica.
-      </p>
-
-      <div class="flow">userInput
-   ├── JSX como texto → normalmente escapado
-   ├── href → validar o esquema da URI
-   ├── document.location → validar destino
-   ├── style → analisar contexto CSS
-   ├── innerHTML → sink perigoso
-   └── dangerouslySetInnerHTML → sink perigoso</div>
-
-      <h3>href controlado</h3>
-      <pre><code>function Link({ url }) {
+<p>The investigator needed to look beyond trivial tag injection because this path is generally handled as text.</p>
+<h2>3. React does not eliminate XSS</h2>
+<p>Browser APIs and non-text contexts remain security-sensitive. User-controlled <code>href</code>, <code>document.location</code>, CSS, <code>innerHTML</code>, and <code>dangerouslySetInnerHTML</code> require checks tailored to their semantics.</p>
+<h3>Controllable href</h3><pre><code>function Link({ url }) {
     return &lt;a href={url}&gt;Clique aqui&lt;/a&gt;;
 }</code></pre>
-
-      <p>
-        Aqui o React não precisa “quebrar” o HTML para existir um problema. Se o atacante controla o valor
-        semântico da URL e a aplicação permite um esquema perigoso, o próprio <code>href</code> pode se
-        tornar uma primitive interessante.
-      </p>
-
-      <h3>dangerouslySetInnerHTML</h3>
-      <pre><code>function Message({ html }) {
+<p>The DOM markup can remain intact while the URL's scheme or destination becomes unsafe.</p>
+<h3>dangerouslySetInnerHTML</h3><pre><code>function Message({ html }) {
     return (
         &lt;div dangerouslySetInnerHTML={{ __html: html }} /&gt;
     );
 }</code></pre>
-
-      <p>
-        Nesse caso o conteúdo deixa de ser apenas texto e passa a ser interpretado como HTML. O mesmo
-        raciocínio vale para código que obtém uma referência de DOM e escreve diretamente em
-        <code>innerHTML</code>.
-      </p>
-
-      <h3>document.location</h3>
-      <pre><code>document.location = userInput;</code></pre>
-
-      <p>
-        React não transforma APIs como <code>document.location</code> em APIs seguras. Se o input controla
-        uma URI, o esquema e o destino continuam precisando de validação.
-      </p>
-
-      <h2>4. BBCode: a camada intermediária</h2>
-      <p>
-        O chat utilizava BBCode, uma linguagem de marcação simplificada. Uma tag como:
-      </p>
-
-      <pre><code>[url=https://example.com]Visitar site[/url]</code></pre>
-
-      <p>pode ser transformada em:</p>
-
-      <pre><code>&lt;a href="https://example.com"&gt;Visitar site&lt;/a&gt;</code></pre>
-
-      <p>O ponto de segurança é a transformação:</p>
-
-      <div class="flow">entrada do usuário
-        ↓
-BBCode
-        ↓
-parser
-        ↓
-React / HTML
-        ↓
-DOM</div>
-
-      <h2>5. Como esse erro poderia aparecer em PHP</h2>
-      <p>Um parser simplificado e vulnerável poderia ser:</p>
-
-      <pre><code>&lt;?php
+<p>Here the value is interpreted as HTML rather than text. The same concern applies to direct writes to <code>innerHTML</code>.</p>
+<h3>document.location</h3><pre><code>document.location = userInput;</code></pre>
+<p>React does not automatically secure navigation APIs; destination and scheme validation remain necessary.</p>
+<h2>4. BBCode as an intermediate layer</h2>
+<p>Steam Chat converted BBCode, a lightweight markup language, into links and HTML. For example, a BBCode tag:</p><pre><code>[url=https://example.com]Visitar site[/url]</code></pre>
+<p>could become a link:</p><pre><code>&lt;a href="https://example.com"&gt;Visitar site&lt;/a&gt;</code></pre>
+<div class="flow">User input → BBCode → parser → React / HTML → DOM</div>
+<h2>5. How a similar bug could appear in PHP</h2>
+<p>The following intentionally simplified PHP parser demonstrates the same type of trust-boundary error:</p><pre><code>&lt;?php
 
 function parseBBCode(string $message): string
 {
@@ -216,237 +104,43 @@ function parseBBCode(string $message): string
 $message = $_POST['message'] ?? '';
 
 echo parseBBCode($message);</code></pre>
-
-      <p>
-        O problema é que o valor capturado em <code>$1</code> entra diretamente no atributo
-        <code>href</code>.
-      </p>
-
-      <div class="flow">SOURCE
-$_POST["message"]
-        ↓
-[url=VALOR]
-        ↓
-parser
-        ↓
-SINK
-href="VALOR"</div>
-
-      <h2>6. O XSS baseado em URI</h2>
-      <p>
-        Em um parser que aceita qualquer esquema, uma entrada com uma URI executável poderia ser
-        transformada em um link perigoso. O ponto não é necessariamente quebrar o atributo ou inserir uma
-        tag <code>&lt;script&gt;</code>; é controlar o significado do próprio <code>href</code>.
-      </p>
-
-      <pre><code>[url=javascript:alert(document.domain)]Clique[/url]</code></pre>
-
-      <p>Conceitualmente isso poderia produzir:</p>
-
-      <pre><code>&lt;a href="javascript:alert(document.domain)"&gt;Clique&lt;/a&gt;</code></pre>
-
-      <p>
-        Essa era uma das classes de primitive investigadas no relatório: controlar o destino de um link.
-      </p>
-
-      <h2>7. A primitive: “eu controlo uma URL”</h2>
-      <p>
-        Essa é uma mudança importante de mentalidade. Em vez de pensar apenas “achei XSS”, o pesquisador
-        pode pensar:
-      </p>
-
-      <div class="flow">capacidade conquistada:
-"eu controlo o destino de uma URL"
-
-pergunta seguinte:
-"quem mais interpreta essa URL?"</div>
-
-      <p>
-        Mesmo quando o caminho por <code>javascript:</code> não produziu o resultado desejado no cliente
-        customizado do Steam, a primitive continuava valiosa.
-      </p>
-
-      <h2>8. Custom URI schemes</h2>
-      <p>
-        Uma URL não precisa começar com <code>https://</code>. Aplicativos podem registrar protocolos
-        próprios, como:
-      </p>
-
-      <pre><code>steam://
+<p>The captured value is inserted into the <code>href</code> attribute without semantic URL validation.</p>
+<h2>6. URI-based XSS</h2>
+<p>If a parser accepts arbitrary schemes, a crafted URI can become a dangerous link without breaking out of its HTML attribute:</p><pre><code>[url=javascript:alert(document.domain)]Clique[/url]</code></pre>
+<p>Conceptually, the generated output could look like:</p><pre><code>&lt;a href="javascript:alert(document.domain)"&gt;Clique&lt;/a&gt;</code></pre>
+<p>The key capability is to control what an <code>href</code> means, rather than merely injecting a new tag.</p>
+<h2>7. The primitive: “I control a URL”</h2>
+<p>A valuable research question is not only “Did I find XSS?” but “What now consumes this URL?” Even if a <code>javascript:</code> path failed in the customized Steam client, URL control could still matter to other components.</p>
+<h2>8. Custom URI schemes</h2>
+<p>Desktop applications may register protocols other than <code>https://</code>:</p><pre><code>steam://
 spotify://
 vscode://
 myapp://</code></pre>
-
-      <p>
-        Quando um navegador embutido encontra uma dessas URIs, ela pode ser encaminhada para uma aplicação
-        nativa.
-      </p>
-
-      <div class="flow">&lt;a href="myapp://settings"&gt;
-        ↓
-CEF
-        ↓
-handler do protocolo
-        ↓
-MyApp.exe</div>
-
-      <p>
-        A partir desse momento, o dado saiu do contexto puramente web e atravessou uma trust boundary.
-      </p>
-
-      <h2>9. O protocolo steam://</h2>
-      <p>
-        O pesquisador passou a investigar URIs do próprio Steam. O interesse aqui não era apenas “abrir
-        alguma tela”, mas descobrir quais operações o cliente desktop processava e com qual nível de
-        privilégio.
-      </p>
-
-      <div class="flow">mensagem
- ↓
-BBCode
- ↓
-href controlável
- ↓
-steam://...
- ↓
-Steam</div>
-
-      <p>
-        Isso mostra por que uma primitive de URL pode ser muito mais relevante dentro de CEF/Electron do que
-        em uma página web isolada.
-      </p>
-
-      <h2>10. OEmbed e conteúdo incorporado</h2>
-      <p>
-        O chat também transformava links externos em conteúdo incorporado. Serviços de OEmbed podem fornecer
-        metadados e, em alguns casos, HTML para montar players, cards ou iframes.
-      </p>
-
-      <div class="flow">URL
- ↓
-OEmbed
- ↓
-HTML / iframe / componente
- ↓
-DOM</div>
-
-      <p>
-        Isso cria outra superfície importante, especialmente quando uma aplicação React precisa recorrer a
-        <code>dangerouslySetInnerHTML</code>, <code>innerHTML</code> ou componentes especiais para renderizar
-        conteúdo externo.
-      </p>
-
-      <h2>11. Tentativa com postMessage</h2>
-      <p>
-        Como conteúdos incorporados podiam rodar em contextos diferentes, uma hipótese era reproduzir
-        mensagens que a aplicação legítima utilizava para conversar entre janelas.
-      </p>
-
-      <pre><code>window.top.postMessage(
+<p>An embedded browser may hand such URIs to a native handler, crossing the web-to-desktop trust boundary.</p>
+<h2>9. The steam:// protocol</h2>
+<p>The researcher inspected Steam-specific URI handlers to learn which native actions the client would perform and with what privileges. This is why control of a URL in a CEF or Electron-style application may have more impact than the same control in a regular web page.</p>
+<h2>10. OEmbed and embedded content</h2>
+<p>External links could become rich embedded content through OEmbed metadata or HTML, potentially involving iframes, players, or special components. Such transformations create extra surfaces when external data is rendered using HTML-oriented sinks.</p>
+<h2>11. Testing postMessage</h2>
+<p>Because embedded content can execute in another context, one hypothesis was that it might send messages resembling those used by the legitimate application:</p><pre><code>window.top.postMessage(
     { action: "algumaAcao" },
     "https://destino-esperado.example"
 );</code></pre>
-
-      <div class="flow">iframe / embed
-      ↓
-postMessage
-      ↓
-janela principal
-      ↓
-possível operação privilegiada</div>
-
-      <p>
-        Nesse caminho específico, o sandbox impedia o acesso necessário. A proteção funcionou. Mas isso não
-        anulava as outras primitives já encontradas.
-      </p>
-
-      <h2>12. Diferenças de privilégio são pistas</h2>
-      <p>
-        O pesquisador observou também que algumas janelas abertas pelo ambiente possuíam funções que outras
-        não possuíam. Isso revela uma pergunta extremamente útil em pesquisa:
-      </p>
-
-      <div class="flow">Contexto A
-privilégio baixo
-        ↓
-consigo alcançar?
-        ↓
-Contexto B
-privilégio maior</div>
-
-      <p>
-        Uma vulnerabilidade crítica pode surgir quando uma entrada de um contexto não confiável consegue
-        atingir outro contexto com permissões maiores.
-      </p>
-
-      <h2>13. Protocol handlers do Windows</h2>
-      <p>
-        A investigação então desceu mais uma camada: como o Windows associa protocolos e tipos de arquivos a
-        programas.
-      </p>
-
-      <div class="flow">URI
- ↓
-Windows identifica o handler
- ↓
-programa associado
- ↓
-argumentos</div>
-
-      <p>
-        Mesmo provocar uma ação aparentemente simples no sistema operacional já prova algo importante:
-        o input remoto conseguiu atravessar a fronteira do navegador.
-      </p>
-
-      <h2>14. Path traversal como primitive adicional</h2>
-      <p>
-        Durante os testes com handlers, a resolução de caminhos mostrou comportamento que podia ser
-        influenciado com sequências de traversal como <code>../</code>. Isso permitiu chegar a um cenário em
-        que um arquivo local existente poderia ser acionado. Ainda havia uma limitação importante: o arquivo
-        precisava existir previamente na máquina.
-      </p>
-
-      <p>
-        Novamente, a conclusão não era “acabou”. Era: <strong>agora tenho mais uma primitive; existe outra
-        ponte que remove essa limitação?</strong>
-      </p>
-
-      <h2>15. A descoberta crítica nos logs</h2>
-      <p>
-        A grande virada aconteceu ao observar o console do Steam. O pesquisador percebeu que operações externas
-        eram traduzidas internamente para uma estrutura semelhante a:
-      </p>
-
-      <pre><code>steam://openexternalforpid/&lt;PID&gt;/&lt;URI&gt;</code></pre>
-
-      <p>
-        Essa observação revelou a função interna que estava por trás do comportamento. Em vez de continuar
-        adivinhando protocolos, agora ele sabia qual mecanismo privilegiado o Steam utilizava.
-      </p>
-
-      <h2>16. openexternalforpid como ponte privilegiada</h2>
-      <div class="flow">target controlado
-       ↓
-steam://openexternalforpid/...
-       ↓
-Steam Web Helper
-       ↓
-operação nativa
-       ↓
-Windows</div>
-
-      <p>
-        A importância está na mudança de privilégio: conteúdo originado em uma interface web conseguia chegar
-        a uma função criada para realizar uma operação nativa.
-      </p>
-
-      <h2>17. Como representar a causa raiz em PHP</h2>
-      <p>
-        Imagine uma aplicação fictícia com um handler interno. O código abaixo é apenas uma representação
-        didática:
-      </p>
-
-      <pre><code>&lt;?php
+<p>For the specific route tested, the sandbox blocked the required access. This was a protection that worked, not evidence of compromise.</p>
+<h2>12. Privilege differences are clues</h2>
+<p>Some windows exposed capabilities unavailable to others. This is a critical research pattern: can input from a lower-privilege context reach a higher-privilege one? Security impact often depends on crossing exactly that boundary.</p>
+<h2>13. Windows protocol handlers</h2>
+<p>The investigation continued into how Windows maps URI schemes and file types to native programs and their arguments. Getting a remote input interpreted by an operating-system handler is evidence that the browser boundary has been crossed, even when the first observed action is limited.</p>
+<h2>14. Path traversal as another primitive</h2>
+<p>Path resolution by handlers could be influenced with traversal-like sequences. One observed limit was that a target file had to exist beforehand. Rather than treating the partial result as complete RCE, the investigator considered whether another bridge could remove that limitation.</p>
+<h2>15. The critical discovery in logs</h2>
+<p>Steam's console revealed that certain external actions mapped internally to a recognizable structure:</p><pre><code>steam://openexternalforpid/&lt;PID&gt;/&lt;URI&gt;</code></pre>
+<p>Logs exposed the privileged mechanism behind observed behavior and reduced guesswork about accepted protocols.</p>
+<h2>16. openexternalforpid as a privileged bridge</h2>
+<div class="flow">Controlled target → steam://openexternalforpid/... → Steam Web Helper → native operation → Windows</div>
+<p>The significant boundary crossing was from web-originated content into functionality intended to perform privileged native operations.</p>
+<h2>17. Representing the root cause in PHP</h2>
+<p>These snippets describe a fictional internal handler to make the trust boundary understandable:</p><pre><code>&lt;?php
 
 function handleUri(string $uri): void
 {
@@ -460,10 +154,7 @@ function handleUri(string $uri): void
 
     openExternal($target);
 }</code></pre>
-
-      <p>A pergunta importante passa a ser: o que <code>openExternal()</code> permite?</p>
-
-      <pre><code>&lt;?php
+<p>The essential question is what <code>openExternal()</code> actually allows:</p><pre><code>&lt;?php
 
 function openExternal(string $target): void
 {
@@ -475,59 +166,12 @@ function openExternal(string $target): void
 
     // shell_exec($target);
 }</code></pre>
-
-      <p>
-        A linha perigosa está propositalmente comentada. O objetivo é entender a causa raiz, não criar um
-        executor funcional.
-      </p>
-
-      <div class="flow">conteúdo remoto
-      ↓
-$target
-      ↓
-função privilegiada
-      ↓
-processo do sistema</div>
-
-      <h2>18. Da falha web ao RCE</h2>
-      <p>
-        O RCE não veio simplesmente de “um XSS que chamou cmd.exe”. A cadeia foi formada por múltiplas
-        interpretações e mudanças de contexto:
-      </p>
-
-      <div class="flow">ATACANTE
-   ↓
-mensagem
-   ↓
-React / BBCode
-   ↓
-controle de URL
-   ↓
-custom URI
-   ↓
-CEF
-   ↓
-Steam Web Helper
-   ↓
-função privilegiada
-   ↓
-processo nativo
-   ↓
-Windows
-   ↓
-RCE</div>
-
-      <p>
-        Esse é o padrão que vale memorizar: uma primitive web aparentemente limitada pode ganhar impacto ao
-        atravessar uma fronteira para um componente com mais privilégios.
-      </p>
-
-      <h2>19. Corrigindo o problema na origem</h2>
-      <p>
-        Um parser de links deve validar o significado da URL, não apenas escapar caracteres HTML.
-      </p>
-
-      <pre><code>&lt;?php
+<p>The dangerous line is deliberately commented out. The example is for understanding the root cause rather than providing a functional executor.</p>
+<h2>18. From web flaw to RCE</h2>
+<p>The chain was not a single XSS call to <code>cmd.exe</code>. Multiple consumers and context changes were involved:</p>
+<div class="flow">Attacker input → message → React / BBCode → URL control → custom URI → CEF → Steam Web Helper → privileged function → native process → Windows → RCE</div>
+<h2>19. Fixing the source</h2>
+<p>A link parser must validate the URL's meaning and allowed scheme, not merely escape HTML characters:</p><pre><code>&lt;?php
 
 function createSafeLink(string $url, string $text): string
 {
@@ -559,19 +203,9 @@ function createSafeLink(string $url, string $text): string
            $safeText .
            '&lt;/a&gt;';
 }</code></pre>
-
-      <p>
-        Aqui existem duas proteções distintas: escaping para o contexto HTML e validação semântica do esquema
-        permitido.
-      </p>
-
-      <h2>20. Protegendo a bridge privilegiada</h2>
-      <p>
-        Uma interface nativa não deveria aceitar uma operação genérica como “abra qualquer coisa que essa
-        string mandar”. É mais seguro expor ações pequenas, estruturadas e explicitamente permitidas.
-      </p>
-
-      <pre><code>&lt;?php
+<p>Contextual HTML escaping and semantic URL validation are complementary protections.</p>
+<h2>20. Hardening the privileged bridge</h2>
+<p>Native interfaces should expose narrowly defined, authorized actions rather than a generic instruction to open or execute any caller-supplied target:</p><pre><code>&lt;?php
 
 $allowedActions = [
     'open_settings',
@@ -582,83 +216,25 @@ $allowedActions = [
 if (!in_array($action, $allowedActions, true)) {
     throw new RuntimeException('Invalid action');
 }</code></pre>
-
-      <div class="flow">ruim:
-"execute qualquer target"
-
-melhor:
-"execute uma das ações conhecidas e predefinidas"</div>
-
-      <h2>21. A mentalidade que tiro desse relatório</h2>
-      <p>
-        A principal lição é não procurar apenas nomes de vulnerabilidades. É mais produtivo acompanhar
-        capacidades.
-      </p>
-
-      <div class="flow">O que eu controlo?
-      ↓
-Onde esse dado chega?
-      ↓
-Quem interpreta depois?
-      ↓
-Existe uma transformação?
-      ↓
-Estou atravessando uma trust boundary?
-      ↓
-O próximo componente tem mais privilégio?
-      ↓
-Que nova primitive eu conquistei?
-      ↓
-Posso encadear com outra?</div>
-
-      <p>
-        O pesquisador poderia ter parado em “consigo controlar uma URL”. Em vez disso, perguntou quais
-        consumidores existiam para aquela URL, quais protocolos eram aceitos, quem os processava e até onde
-        esse processamento chegava.
-      </p>
-
-      <h2>22. Fórmula mental</h2>
-      <div class="flow">Primitive
-   +
-Trust Boundary
-   +
-Privilege Difference
-   +
-Chaining
-   =
-Impacto elevado</div>
-
-      <p>
-        Esse modelo é útil não só para CEF, mas também para Electron, WebViews, extensões de navegador e
-        qualquer aplicação híbrida em que uma interface web converse com componentes nativos.
-      </p>
-
-      <h2>Conclusão</h2>
-      <p>
-        React reduzia os XSS triviais, mas não eliminava sinks perigosos. BBCode e OEmbed criavam
-        transformações adicionais. O controle de URL virou uma primitive. Custom URI permitiu atravessar o
-        contexto web. A descoberta de uma função privilegiada interna mostrou como alcançar o ambiente nativo.
-        O RCE apareceu no final dessa cadeia, e não como um único erro isolado.
-      </p>
-
-      <p>
-        A pergunta que mais resume o relatório é:
-        <strong>“Eu controlo alguma coisa. Quem interpreta isso depois, e esse próximo componente consegue
-        fazer algo que eu não consigo?”</strong>
-      </p>
-
-      <h2>Referência</h2>
-      <p>
-        Relatório original no HackerOne: <a href="https://hackerone.com/reports/409850" target="_blank" rel="noopener noreferrer">https://hackerone.com/reports/409850 ↗</a>
-      </p>
-
-      <a class="back-link" href="../">← voltar</a>
-    </article>
+<p><strong>Unsafe:</strong> execute an arbitrary target. <strong>Safer:</strong> choose from known, predefined actions.</p>
+<h2>21. The research mindset</h2>
+<p>Think in capabilities: what do I control, where does it go, who interprets it next, what transformations occur, is a trust boundary crossed, does the next component have more privileges, and can that primitive be chained with another? The original researcher did not stop at URL control but investigated its consumers and their authority.</p>
+<h2>22. A mental model</h2>
+<div class="flow">Primitive + Trust boundary + Privilege difference + Chaining = Higher impact</div>
+<p>This perspective also applies to Electron, WebViews, browser extensions, and other hybrid web/native applications.</p>
+<h2>Conclusion</h2>
+<p>React reduced trivial XSS but did not eliminate dangerous sinks. BBCode and OEmbed introduced transformations. URL control led to custom protocols; a privileged bridge provided access to native behavior. The resulting RCE depended on the full chain, not one isolated mistake.</p>
+<p><strong>Key question:</strong> “I control something. Who interprets it next, and what can that component do that I cannot?”</p>
+<h2>Reference</h2>
+<p><a href="https://hackerone.com/reports/409850" target="_blank" rel="noopener noreferrer">Original third-party HackerOne report #409850 ↗</a></p>
+<a class="back-link" href="../">← back to blog</a>
+</article>
   </main>
 
   <footer class="site-footer wrap">
     <span>poystick</span>
     <span>AI-assisted · validado por Tarcísio Luchesi</span>
   </footer>
+  <script src="../assets/i18n.js" defer></script>
 </body>
 </html>
