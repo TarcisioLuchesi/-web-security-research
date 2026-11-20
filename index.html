@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Poystick — pesquisa de segurança em WordPress, write-ups e provas de conceito.">
+  <meta name="description" content="Poystick — WordPress security research, write-ups, and proofs of concept.">
   <meta name="theme-color" content="#0a0a0a">
   <title>poystick</title>
   <style>
@@ -344,18 +344,18 @@ pre{
   <header class="site-header">
     <a class="logo" href="./">poystick<span>.</span></a>
     <nav>
-      <a href="#perfis">perfis de pesquisa</a>
+      <a href="#perfis">research profiles</a>
       <a href="#writeups">write-ups</a>
       <a href="#pocs">PoCs</a>
-      <a href="methodology.html">metodologia de estudo</a>
-      <a href="wordpress-methodology.html">metodologia WordPress</a>
-      <a href="pressupostos/">pressupostos</a>
-      <a href="#anonymous">Anonymous e saúde mental</a>
-      <a href="#acoes-sociais">ações sociais</a>
+      <a href="methodology.html">study methodology</a>
+      <a href="wordpress-methodology.html">WordPress methodology</a>
+      <a href="pressupostos/">hypotheses</a>
+      <a href="#anonymous">Anonymous and mental health</a>
+      <a href="#acoes-sociais">social initiatives</a>
 
-      <a href="#frases">frases em que acredito</a>
-      <a href="#filosofia">filosofia</a>
-      <a href="#sobre">sobre</a>
+      <a href="#frases">quotes I believe in</a>
+      <a href="#filosofia">philosophy</a>
+      <a href="#sobre">about</a>
       <a href="https://github.com/TarcisioLuchesi">github ↗</a>
     </nav>
   </header>
@@ -373,31 +373,29 @@ pre{
       </p>
 
       <div class="method-filter" aria-label="Filtrar publicações pelo método de pesquisa">
-        <button type="button" class="active" data-filter="all">Todos</button>
+        <button type="button" class="active" data-filter="all">All</button>
         <button type="button" data-filter="manual">Manual</button>
         <button type="button" data-filter="ai-assisted">AI-Assisted</button>
         <button type="button" data-filter="automated">Automated</button>
       </div>
       <p class="method-note">
-        Manual = pesquisa conduzida manualmente. AI-Assisted = IA participa do processo e o resultado é validado.
-        Automated = descoberta originada por pipeline ou automação.
+        Manual = research conducted manually. AI-Assisted = AI supports the process and the result is verified. Automated = discovery originating from a pipeline or automation.
       </p>
 
       <div class="origin-filter" aria-label="Filtrar publicações por autoria da vulnerabilidade">
-        <button type="button" class="active" data-origin-filter="all">Todas</button>
-        <button type="button" data-origin-filter="own">Pesquisas próprias</button>
-        <button type="button" data-origin-filter="third-party">Terceiros</button>
-        <button type="button" data-origin-filter="educational">Educacionais</button>
+        <button type="button" class="active" data-origin-filter="all">All</button>
+        <button type="button" data-origin-filter="own">My research</button>
+        <button type="button" data-origin-filter="third-party">Third-party research</button>
+        <button type="button" data-origin-filter="educational">Educational</button>
       </div>
       <p class="method-note">
-        Pesquisas próprias = análises, relatos e CVEs atribuídos a Tarcísio Luchesi (Poystick).
-        Terceiros = vulnerabilidades descobertas por outros hunters. Educacionais = fundamentos e metodologias, sem atribuição de falha.
+        My research = analyses, reports, and CVEs attributed to Tarcísio Luchesi (Poystick). Third-party = vulnerabilities discovered by other researchers. Educational = fundamentals and methodologies, without claiming a vulnerability discovery.
       </p>
     </section>
 
     <section id="perfis" class="section">
       <div class="section-title">
-        <h2>Perfis de pesquisa</h2>
+        <h2>Research profiles</h2>
         <span>Patchstack / Wordfence</span>
       </div>
 
@@ -405,8 +403,7 @@ pre{
         <div>
           <h3>Patchstack — Tarcísio Luchesi (Poystick)</h3>
           <p>
-            Perfil público de pesquisador com relatórios e vulnerabilidades de segurança
-            em plugins WordPress.
+            Public researcher profile featuring vulnerability reports involving WordPress plugins.
           </p>
         </div>
         <span class="arrow" aria-hidden="true">↗</span>
@@ -416,7 +413,7 @@ pre{
         <div>
           <h3>Wordfence Intelligence — Tarcísio Luchesi (Poystick)</h3>
           <p>
-            Página de pesquisador na base de inteligência de vulnerabilidades da Wordfence.
+            Researcher profile in the Wordfence vulnerability intelligence database.
           </p>
         </div>
         <span class="arrow" aria-hidden="true">↗</span>
@@ -425,26 +422,25 @@ pre{
 
     <section id="pressupostos" class="section">
       <div class="section-title">
-        <h2>Pressupostos e hipóteses</h2>
-        <span>caderno de pesquisa</span>
+        <h2>Assumptions and hypotheses</h2>
+        <span>research notebook</span>
       </div>
       <p class="method-note" style="margin:0 0 22px;max-width:700px">
-        Registro como uma observação se torna uma hipótese verificável. A origem do raciocínio
-        é identificada com clareza, sem confundir ideias com vulnerabilidades confirmadas.
+        I document how an observation becomes a testable hypothesis. I identify where the reasoning originated, without confusing ideas with confirmed vulnerabilities.
       </p>
       <a class="post-row" href="pressupostos/#manual">
         <div>
-          <p class="post-date">01 / RACIOCÍNIO PRÓPRIO</p>
-          <h3>Pressupostos manuais</h3>
-          <p>Observações, hipóteses, testes controlados e limites do que foi demonstrado.</p>
+          <p class="post-date">01 / INDEPENDENT REASONING</p>
+          <h3>Manually developed hypotheses</h3>
+          <p>Observations, hypotheses, controlled tests, and the limits of what was demonstrated.</p>
         </div>
         <span class="arrow" aria-hidden="true">→</span>
       </a>
       <a class="post-row" href="pressupostos/#ia">
         <div>
-          <p class="post-date">02 / RACIOCÍNIO ASSISTIDO</p>
-          <h3>Pressupostos com ajuda da IA</h3>
-          <p>A IA ajuda a explorar alternativas e revisar premissas; a conclusão depende de validação independente.</p>
+          <p class="post-date">02 / AI-ASSISTED REASONING</p>
+          <h3>AI-assisted hypotheses</h3>
+          <p>AI helps explore alternatives and challenge assumptions; conclusions require independent validation.</p>
         </div>
         <span class="arrow" aria-hidden="true">→</span>
       </a>
@@ -453,25 +449,24 @@ pre{
     <section id="writeups" class="section">
       <div class="section-title">
         <h2>Write-ups</h2>
-        <span>09 publicações</span>
+        <span>09 publications</span>
       </div>
 
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/base64-decode-after-validation-xss-hypothesis.html">
         <div>
-          <p class="post-date">2026-11-20 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Hipótese · não confirmada</span></p>
-          <h3>Base64, validação antecipada e XSS: quando o texto muda depois do filtro</h3>
-          <p>Investigação sobre decodificação após a validação, sinks HTML e os limites da hipótese de bypass de sanitização, sem alegar uma falha comprovada no Gmail.</p>
+          <p class="post-date">2026-11-20 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Hypothesis · unconfirmed</span></p>
+          <h3>Base64, early validation, and XSS: when text changes after the filter</h3>
+          <p>Research on decoding after validation, HTML sinks, and the limits of a sanitization-bypass hypothesis, without claiming a confirmed flaw in Gmail.</p>
         </div>
         <span class="arrow" aria-hidden="true">→</span>
       </a>
 
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/bugpay-cors-2fa-cross-origin.html">
         <div>
-          <p class="post-date">2026-11-19 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Pesquisa própria · Low</span></p>
-          <h3>BugPay — CORS permissivo em endpoint 2FA: análise e reteste</h3>
+          <p class="post-date">2026-11-19 <span class="method-badge">AI-Assisted</span> <span class="method-badge">My research · Low</span></p>
+          <h3>BugPay — Permissive CORS on a 2FA endpoint: analysis and retest</h3>
           <p>
-            Leitura cross-origin no início do desafio 2FA, limites de impacto, reteste com origem
-            restrita e conclusão do reporte autorizado para divulgação.
+            Cross-origin reading at the start of a 2FA challenge, impact limitations, retesting with a restricted origin, and conclusion of an authorized disclosure report.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -479,11 +474,10 @@ pre{
 
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/xss-refletido-php-waf-dotless-base64.html">
         <div>
-          <p class="post-date">2026-11-08 <span class="method-badge">AI-Assisted</span> <span class="method-badge">CVE própria · Poystick</span></p>
-          <h3>CVE-2026-61957 — XSS refletido no miniOrange OTP Verification ≤ 5.5.1</h3>
+          <p class="post-date">2026-11-08 <span class="method-badge">AI-Assisted</span> <span class="method-badge">My CVE · Poystick</span></p>
+          <h3>CVE-2026-61957 — Reflected XSS in miniOrange OTP Verification ≤ 5.5.1</h3>
           <p>
-            Como investiguei a reflexão de chaves GET no HTML e a normalização de nomes
-            pelo PHP, com payload dotless em Base64. CVSS 7.1; corrigido na versão 5.5.2.
+            How I investigated GET parameter-name reflection in HTML and PHP name normalization, using a dotless Base64 payload. CVSS 7.1; fixed in version 5.5.2.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -491,11 +485,10 @@ pre{
 
       <a class="post-row" data-method="ai-assisted" data-origin="educational" href="research/icegram-collect-1.3.21-review-url-sem-escape.html">
         <div>
-          <p class="post-date">2026-11-01 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Análise estática</span></p>
-          <h3>Icegram Collect 1.3.21 — de review_url ao sink HTML</h3>
+          <p class="post-date">2026-11-01 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Static analysis</span></p>
+          <h3>Icegram Collect 1.3.21 — from review_url to an HTML sink</h3>
           <p>
-            Do hook admin_notices ao meta refresh: o valor chega sem escape ao atributo HTML,
-            mas não há exploração por usuário externo demonstrada.
+            From the admin_notices hook to meta refresh: the value reaches an HTML attribute without escaping, but no exploitation by an external user was demonstrated.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -503,11 +496,10 @@ pre{
 
       <a class="post-row" data-method="ai-assisted" data-origin="third-party" href="research/cve-2026-33938-handlebars-ctf.html">
         <div>
-          <p class="post-date">2026-10-13 <span class="method-badge">AI-Assisted</span> <span class="method-badge">CTF / CVE de terceiros</span></p>
-          <h3>CVE-2026-33938 — Prototype Pollution até possível RCE no Handlebars</h3>
+          <p class="post-date">2026-10-13 <span class="method-badge">AI-Assisted</span> <span class="method-badge">CTF / third-party CVE</span></p>
+          <h3>CVE-2026-33938 — Prototype Pollution to potential RCE in Handlebars</h3>
           <p>
-            Análise do fluxo do template ao worker, bypass da allowlist e mutação de @partial-block.
-            Inclui AST, code injection e uma PoC candidata ainda sem confirmação de RCE no CTF.
+            Analysis of the template-to-worker flow, allowlist bypass, and @partial-block mutation. Covers ASTs, code injection, and a candidate PoC without confirmed RCE in the CTF.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -515,11 +507,10 @@ pre{
 
       <a class="post-row" data-method="ai-assisted" data-origin="third-party" href="research/steam-chat-xss-to-rce.html">
         <div>
-          <p class="post-date">2026-10-04 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Validado por Tarcísio Luchesi (Poystick)</span></p>
-          <h3>Do XSS ao RCE no Steam Chat — React, BBCode, CEF e custom URI</h3>
+          <p class="post-date">2026-10-04 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Validated by Tarcísio Luchesi (Poystick)</span></p>
+          <h3>From XSS to RCE in Steam Chat — React, BBCode, CEF, and custom URIs</h3>
           <p>
-            Artigo didático criado com IA e tecnicamente revisado/validado por mim, reconstruindo a cadeia
-            de uma falha pública de terceiro desde as primitives de XSS/URL até a fronteira nativa e o RCE.
+            Educational article created with AI and technically reviewed/validated by me, reconstructing a publicly disclosed third-party flaw from XSS/URL primitives to the native trust boundary and RCE.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -527,11 +518,10 @@ pre{
 
       <a class="post-row" data-method="ai-assisted" data-origin="educational" href="research/black-box-newsletter-consent.html">
         <div>
-          <p class="post-date">2026-10-07 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Material educativo</span></p>
-          <h3>Do formulário à API — análise black box de integrações de newsletter</h3>
+          <p class="post-date">2026-10-07 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Educational material</span></p>
+          <h3>From form to API — black-box analysis of newsletter integrations</h3>
           <p>
-            Dos fundamentos cliente-servidor ao controle de parâmetros, trust boundaries,
-            validação segura e autorização em backends sem CMS.
+            From client-server fundamentals to parameter control, trust boundaries, secure validation, and authorization in non-CMS backends.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -540,10 +530,9 @@ pre{
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/cve-2025-15285.html">
         <div>
           <p class="post-date">2026-09-23 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Tarcísio Luchesi (Poystick)</span></p>
-          <h3>CVE-2025-15285 — Missing Authorization no SEO Flow ≤ 2.2.1</h3>
+          <h3>CVE-2025-15285 — Missing Authorization in SEO Flow ≤ 2.2.1</h3>
           <p>
-            O plugin verifica um HMAC inválido, retorna um WP_Error e depois ignora esse retorno.
-            A execução continua até funções como wp_insert_post().
+            The plugin detects an invalid HMAC, returns a WP_Error, and then ignores the result. Execution proceeds to functions such as wp_insert_post().
           </p>
         </div>
         <span class="arrow">→</span>
@@ -552,10 +541,9 @@ pre{
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/paytium-5-0-3-5-0-5-xss.html">
         <div>
           <p class="post-date">2026-09-24 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Tarcísio Luchesi (Poystick)</span></p>
-          <h3>Paytium 5.0.3 → 5.0.5 — XSS armazenado no código de desconto</h3>
+          <h3>Paytium 5.0.3 → 5.0.5 — Stored XSS in discount codes</h3>
           <p>
-            Revisão do sink sem escape em 5.0.3 e confirmação da correção com esc_html()
-            em 5.0.5, com limites claros sobre o que foi e não foi corrigido.
+            Review of an unescaped sink in 5.0.3 and confirmation of the esc_html() fix in 5.0.5, with clear limits on what was and was not fixed.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -565,16 +553,15 @@ pre{
     <section id="pocs" class="section">
       <div class="section-title">
         <h2>PoCs</h2>
-        <span>01 publicado</span>
+        <span>01 published</span>
       </div>
 
       <a class="post-row" data-method="ai-assisted" data-origin="own" href="pocs/cve-2025-15285.html">
         <div>
           <p class="post-date">2026-09-23 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Tarcísio Luchesi (Poystick)</span></p>
-          <h3>CVE-2025-15285 — PoC interativa em Python</h3>
+          <h3>CVE-2025-15285 — Interactive Python PoC</h3>
           <p>
-            Demonstra em laboratório a criação, modificação e exclusão de posts,
-            além da criação de categorias, usando um HMAC deliberadamente inválido.
+            Laboratory demonstration of creating, modifying, and deleting posts, as well as creating categories, using an intentionally invalid HMAC.
           </p>
         </div>
         <span class="arrow">→</span>
@@ -583,35 +570,32 @@ pre{
 
     <section id="anonymous" class="section about">
       <div class="section-title">
-        <h2>Anonymous — uma causa pela saúde mental</h2>
-        <span>manifesto pessoal</span>
+        <h2>Anonymous — a cause for mental health</h2>
+        <span>personal statement</span>
       </div>
-      <p><strong>A saúde mental é mais importante que qualquer conquista, status ou reconhecimento.</strong></p>
+      <p><strong>Mental health matters more than any achievement, status, or recognition.</strong></p>
       <p>
-        Pretendo me aproximar dos ideais associados à Anonymous por uma causa social:
-        defender a saúde mental, combater o preconceito e incentivar o acolhimento
-        e o acesso a cuidados para quem precisa. Quero usar minha voz e meus conhecimentos
-        em tecnologia para conscientização, solidariedade e educação.
+        I hope to align myself with ideals associated with Anonymous in support of a social cause: advocating for mental health, fighting stigma, and encouraging compassion and access to care. I want to use my voice and technical knowledge to promote awareness, solidarity, and education.
       </p>
     </section>
 
     <section id="acoes-sociais" class="section about">
       <div class="section-title">
-        <h2>Ações sociais</h2>
-        <span>saúde mental</span>
+        <h2>Social initiatives</h2>
+        <span>mental health</span>
       </div>
-      <p>Essa aba irá mostrar todos os feitos que eu realizei por uma causa social com foco em saúde mental.</p>
+      <p>This section will showcase actions I take in support of social causes focused on mental health.</p>
     </section>
 
     <section id="frases" class="section about">
       <div class="section-title">
-        <h2>Frases em que acredito na área de hacking</h2>
-        <span>reflexões de Poystick</span>
+        <h2>Quotes I believe in about hacking</h2>
+        <span>Poystick's reflections</span>
       </div>
       <ol class="quote-list">
         <li>"If you work with hypotheses, you could be the best hacker in the world" — by poystick</li>
         <li>Soft skill &gt; hard skill — by poystick</li>
-        <li>Não tem como ser 100% perfeito — by poystick</li>
+        <li>Nobody can be 100% perfect — by poystick</li>
               <li>"Toda vulnerabilidade começa com uma hipótese." — by poystick</li>
         <li>"Um bom hacker não sabe tudo, mas sabe investigar." — by poystick</li>
         <li>"A curiosidade é mais importante do que decorar ferramentas." — by poystick</li>
@@ -628,50 +612,39 @@ pre{
 
     <section id="filosofia" class="section about">
       <div class="section-title">
-        <h2>Filosofia</h2>
+        <h2>Philosophy</h2>
       </div>
 
       <p>
-        <strong>Aprender construindo, usar IA para aumentar minha capacidade, entender por engenharia reversa
-        e recorrer à teoria quando ela se torna necessária.</strong>
+        <strong>Learn by building, use AI to expand my capabilities, understand through reverse engineering, and turn to theory when needed.</strong>
       </p>
 
       <p>
-        Minha forma de estudar é orientada por projetos e por problemas reais. Em vez de esperar dominar toda
-        a teoria antes de começar, prefiro construir, testar, analisar o resultado e aprofundar os conceitos
-        sob demanda. A IA faz parte desse processo como ferramenta de aceleração: pode ajudar a gerar hipóteses,
-        analisar código, criar rascunhos, automações e PoCs, mas o resultado precisa ser entendido e validado.
+        My learning is driven by projects and real-world problems. Rather than waiting to master all the theory, I prefer to build, test, analyze outcomes, and deepen my understanding on demand. AI accelerates this process by helping generate hypotheses, analyze code, draft materials, automate tasks, and create PoCs, but every result must be understood and validated.
       </p>
 
       <p>
-        <strong>Na cibersegurança, não quero apenas caçar bounty; quero entender vulnerabilidades,
-        produzir pesquisa útil e me tornar muito bom em um nicho específico.</strong>
+        <strong>In cybersecurity, I do not just want to chase bounties; I want to understand vulnerabilities, produce useful research, and become highly skilled in a specific niche.</strong>
       </p>
 
       <p>
-        Para mim, CVEs, exploits, write-ups, ferramentas e pesquisa prática são também formas de aprendizagem.
-        Quanto mais eu investigo uma vulnerabilidade, mais a teoria deixa de ser algo abstrato e passa a fazer
-        parte do trabalho real.
+        For me, CVEs, exploits, write-ups, tools, and hands-on research are also ways to learn. The more I investigate a vulnerability, the more theory stops being abstract and becomes part of real work.
       </p>
 
       <p>
-        Também acredito que conhecimento em segurança deve circular. Compartilhar metodologia, explicar padrões
-        e ajudar outras pessoas a aprender aumenta a quantidade de gente capaz de pesquisar e proteger sistemas.
+        I also believe security knowledge should be shared. Sharing methodologies, explaining patterns, and helping others learn increases the number of people who can research and protect systems.
       </p>
     </section>
 
     <section id="sobre" class="section about">
       <div class="section-title">
-        <h2>Sobre</h2>
+        <h2>About</h2>
       </div>
       <p>
-        Meu foco atual é pesquisa de vulnerabilidades em WordPress. Normalmente começo pela
-        superfície exposta pelo plugin, sigo o fluxo dos dados até um sink sensível e depois
-        valido a hipótese em laboratório.
+        My current focus is WordPress vulnerability research. I usually start with the attack surface exposed by a plugin, trace data flow to a sensitive sink, and then validate the hypothesis in a lab.
       </p>
       <p>
-        Este site é só um lugar para organizar o que eu estiver estudando e publicando.
-        PoCs e testes descritos aqui são voltados a ambientes próprios ou autorizados.
+        This site is a place to organize my studies and publications. The PoCs and tests described here are intended for my own environments or authorized testing.
       </p>
     </section>
   </main>
@@ -715,5 +688,6 @@ pre{
       });
     });
   </script>
+  <script src="assets/i18n.js" defer></script>
 </body>
 </html>
