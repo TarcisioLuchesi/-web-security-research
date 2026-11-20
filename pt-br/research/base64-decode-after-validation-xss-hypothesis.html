@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Hipótese de pesquisa: como a decodificação Base64 depois de validações pode introduzir XSS quando o resultado é interpretado como HTML.">
+<title>Base64, ordem de validação e XSS — Poystick</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<style>
+.article h3{margin:30px 0 8px;color:#eee;font:700 17px/1.4 ui-monospace,monospace}
+.article a{color:#aab7ff;text-decoration:underline}
+.article strong{color:#eee}
+.article ul,.article ol{padding-left:24px}
+.article li{margin:10px 0}
+.note{margin:25px 0;padding:18px 20px;background:#111;border:1px solid var(--line);border-left:3px solid #7a8cff}
+pre code{white-space:pre}
+.article table{border-collapse:collapse;width:100%;font-size:14px}
+.article th,.article td{border:1px solid #333;padding:12px;text-align:left}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="logo" href="../">poystick<span>.</span></a><nav><a href="../#writeups">write-ups</a><a href="../pressupostos/#ia">hipóteses</a><a href="../#sobre">sobre</a><a href="https://github.com/TarcisioLuchesi">github ↗</a></nav></header>
+<main class="article-shell">
+<section class="article-hero">
+<div class="kicker">security research / encoding / hipótese técnica</div>
+<h1>Base64, validação antecipada e XSS: quando o texto muda depois do filtro</h1>
+<p class="hero-copy">Investigando se uma aplicação pode aceitar uma entrada codificada, decodificá-la posteriormente e introduzir HTML não confiável em um ponto de saída.</p>
+<div class="article-meta"><span>20 nov. 2026</span><span>XSS</span><span>Base64</span><span>Source-to-sink</span><span>AI-Assisted</span><span>Hipótese não validada em alvo real</span></div>
+<div class="article-meta"><span>Hipótese proposta por Tarcísio Luchesi (Poystick)</span></div>
+</section>
+<article class="article">
+<div class="note"><strong>Status da pesquisa:</strong> mecanismo tecnicamente plausível e já conhecido na literatura de segurança; não há, neste artigo, evidência de exploração no Gmail, no Google ou em uma aplicação real específica. Não se reivindica uma nova classe de vulnerabilidade.</div>
+<h2>1. A hipótese</h2>
+<p>Uma aplicação pode validar uma string que aparentemente só contém caracteres permitidos, persistir ou transmitir o valor em Base64 e, depois, decodificá-lo para produzir conteúdo na interface. Se a verificação relevante foi aplicada apenas à representação codificada, e o conteúdo decodificado for entregue a um interpretador HTML sem proteção adequada, pode surgir uma vulnerabilidade XSS.</p>
+<p>O problema não é o algoritmo Base64: ele apenas transporta bytes de maneira reversível. O possível defeito está na <strong>ordem de operações</strong> e na <strong>mudança da fronteira de confiança</strong> entre a entrada, a decodificação e o ponto de saída.</p>
+<div class="flow">Entrada não confiável → Base64 → validação do texto codificado → armazenamento/transporte → decode Base64 → saída HTML insegura → possível XSS</div>
+<h2>2. Base64 sem padding</h2>
+<p>Algumas implementações aceitam Base64 sem os caracteres finais de padding <code>=</code>. Isso não altera o conteúdo original após a decodificação, nem representa, por si só, um bypass. O resultado depende das regras da biblioteca que faz o decode.</p>
+<p>Exemplo inofensivo para acompanhar o fluxo:</p>
+<pre><code>Entrada original: &lt;b&gt;teste&lt;/b&gt;
+Base64 sem padding: PGI+dGVzdGU8L2I+
+Resultado decodificado: &lt;b&gt;teste&lt;/b&gt;</code></pre>
+<p>O código acima ilustra a diferença entre armazenar dados textuais e interpretar marcação. O mesmo valor pode ser seguro como texto e perigoso quando tratado como HTML ativo.</p>
+<h2>3. Validação não é necessariamente sanitização</h2>
+<p>Uma regex que aceita letras, números, símbolos e pontuação Unicode não bloqueia automaticamente marcação HTML. Por exemplo, o padrão <code>[\p{L}\p{M}\p{S}\p{N}\p{P}]+</code>, associado a restrições de username do Amazon Cognito, não é um mecanismo de prevenção de XSS. O sucesso da validação do username não prova nada sobre a renderização posterior do valor.</p>
+<p>Uma proteção de frontend pode barrar determinados caracteres ou mostrar a entrada com segurança, enquanto outro componente realiza uma decodificação e cria HTML usando APIs perigosas. Uma implementação de backend também pode validar uma representação antes do decode. Nenhum desses cenários significa, automaticamente, que as duas camadas foram contornadas: é preciso demonstrar a cadeia completa.</p>
+<h2>4. PoC local e reproduzível: diferença entre sink seguro e inseguro</h2>
+<p>Este exemplo usa um valor benigno que contém apenas marcação de negrito, sem JavaScript. Ele demonstra a transformação e a interpretação de HTML, não uma exploração confirmada.</p>
+<pre><code>&lt;div id="seguro"&gt;&lt;/div&gt;
+&lt;div id="inseguro"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const encoded = "PGI+dGVzdGU8L2I+";
+  const decoded = atob(encoded);
+
+  // Exibe como texto: não interpreta tags HTML.
+  document.querySelector("#seguro").textContent = decoded;
+
+  // Interpreta HTML: NÃO utilizar com entrada não confiável.
+  document.querySelector("#inseguro").innerHTML = decoded;
+&lt;/script&gt;</code></pre>
+<p>No primeiro elemento, o navegador mostra literalmente <code>&lt;b&gt;teste&lt;/b&gt;</code>. No segundo, renderiza <strong>teste</strong> em negrito. Isso confirma a existência de uma mudança de interpretação, mas <strong>não é, sozinho, prova de execução de JavaScript</strong>.</p>
+<h2>5. Exemplo prático: Base64 aceito no backend, XSS no frontend</h2>
+<p>Em um laboratório controlado, suponha que o backend aceite uma mensagem codificada e valide apenas os caracteres do Base64. O frontend decodifica o valor e o insere em HTML sem uma proteção posterior. A demonstração a seguir usa <code>alert(1)</code> como indicador de execução e não envolve qualquer serviço real.</p>
+<h3>Etapa 1 — conteúdo original e codificação</h3>
+<pre><code>Original: &lt;img src=x onerror=alert(1)&gt;
+Base64 sem padding: PGltZyBzcmM9eCBvbmVycm9yPWFsZXJ0KDEpPg</code></pre>
+<h3>Etapa 2 — backend valida apenas a representação codificada</h3>
+<pre><code>const regex = /^[A-Za-z0-9+/]+$/;
+function salvarMensagem(valor) {
+  if (!regex.test(valor)) throw new Error("Entrada inválida");
+  return valor;
+}</code></pre>
+<p>A validação acima aceita o valor Base64, mas não examina o conteúdo decodificado. Ela não é uma defesa de XSS.</p>
+<h3>Etapa 3 — frontend decodifica e utiliza um sink inseguro</h3>
+<pre><code>&lt;div id="resultado"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const mensagem = "PGltZyBzcmM9eCBvbmVycm9yPWFsZXJ0KDEpPg";
+  const decoded = atob(mensagem);
+  document.getElementById("resultado").innerHTML = decoded;
+&lt;/script&gt;</code></pre>
+<p><strong>Resultado esperado:</strong> em uma página de laboratório sem uma política CSP que bloqueie manipuladores inline, o navegador tenta carregar a imagem inexistente e executa <code>alert(1)</code> no evento de erro. Isso demonstra um fluxo vulnerável construído para o teste; não prova bypass em uma aplicação real.</p>
+<h3>Etapa 4 — correção no ponto de saída</h3>
+<pre><code>document.getElementById("resultado").textContent = decoded;</code></pre>
+<p>Com <code>textContent</code>, a marcação decodificada é exibida como texto. Se a aplicação realmente precisar renderizar HTML fornecido por usuários, deve usar sanitização adequada depois do decode e antes de inserir o resultado no DOM.</p>
+<p><strong>Observação:</strong> remover <code>=</code> do fim do Base64 não é necessário para esse mecanismo; a aceitação de padding ausente depende do decodificador. O problema é a interpretação insegura após a transformação.</p>
+<h2>6. O que provar para sustentar a hipótese em uma aplicação real</h2>
+<ol>
+<li>Identificar a origem controlável (parâmetro, atributo, mensagem, armazenamento ou resposta da API).</li>
+<li>Demonstrar que a representação codificada passa pela verificação relevante e que o dado realmente chega ao componente analisado.</li>
+<li>Capturar a operação de decode no backend ou no frontend e documentar em que momento ela ocorre em relação à validação e sanitização.</li>
+<li>Localizar o sink final: <code>textContent</code>, <code>innerHTML</code>, template HTML, atributo, URL ou outra API.</li>
+<li>Confirmar se o dado decodificado recebe proteção contextual antes do uso, e não apenas na entrada.</li>
+<li>Reproduzir uma consequência de segurança, em ambiente local ou expressamente autorizado, distinguindo DOM XSS, XSS refletido e armazenado.</li>
+</ol>
+<h2>7. E quanto ao Gmail?</h2>
+<p><strong>Não há evidência apresentada de bypass das proteções do Gmail.</strong> A hipótese pode ser estudada em qualquer aplicação que decodifique conteúdo externo, inclusive fluxos de visualização de mensagens, mas não se deve inferir que um serviço específico realize a decodificação após sua última camada de sanitização, nem que interprete o resultado como HTML ativo. Sistemas de email podem usar parsing e sanitização em múltiplos estágios, políticas de conteúdo e isolamento.</p>
+<p>Para sustentar uma alegação relativa ao Gmail, seriam necessários um fluxo de entrada real, uma saída controlável, provas de ordem das transformações e uma reprodução autorizada. Sem isso, o cenário continua sendo uma hipótese geral, não um achado sobre o Google.</p>
+<h2>8. Proteções recomendadas</h2>
+<ul>
+<li>Tratar Base64 decodificado como dado não confiável, mesmo quando a versão codificada passou em validações.</li>
+<li>Aplicar validações semânticas após as transformações necessárias e codificação de saída específica para o contexto.</li>
+<li>Preferir <code>textContent</code> ao exibir texto; se HTML de terceiros for necessário, sanitizá-lo corretamente após o decode e antes de renderizar.</li>
+<li>Evitar <code>innerHTML</code> com conteúdo não confiável e revisar fluxos em que componentes diferentes decodificam a mesma entrada.</li>
+<li>Não tratar regex de identificação, encoding, WAF ou validação exclusivamente no frontend como substitutos de proteção de saída.</li>
+</ul>
+<h2>9. Conclusão e grau de confiança</h2>
+<p><strong>Conclusão:</strong> a ideia é válida como hipótese de análise de fluxo de dados. Base64 pode esconder a representação original de um valor durante uma checagem superficial, mas não burla uma sanitização corretamente aplicada ao valor decodificado, antes do sink. A situação descrita corresponde a classes conhecidas de problemas de canonicalização, transformação posterior à verificação e XSS — ainda sem prova neste caso de aplicação real.</p>
+<p><strong>Grau de confiança:</strong> alto para a plausibilidade do mecanismo; não estabelecido para um bypass concreto de defesa do Gmail.</p>
+<h2>10. Referências</h2>
+<ul>
+<li><a href="https://portswigger.net/web-security/essential-skills/obfuscating-attacks-using-encodings" target="_blank" rel="noopener noreferrer">PortSwigger — Obfuscating attacks using encodings</a></li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP — Cross Site Scripting Prevention Cheat Sheet</a></li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP — DOM based XSS Prevention</a></li>
+<li><a href="https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_UserType.html" target="_blank" rel="noopener noreferrer">AWS Cognito — UserType username constraints</a></li>
+</ul>
+<a class="back-link" href="../">← voltar ao blog</a>
+</article>
+</main>
+<footer class="site-footer wrap"><span>Poystick · Tarcísio Luchesi</span><span>Pesquisa educacional — testes locais ou autorizados</span></footer>
+  <script src="../../assets/i18n.js" defer></script>
+</body>
+</html>
