@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Análise defensiva do XSS armazenado no código de desconto do Paytium 5.0.3 e da correção confirmada no Paytium 5.0.5.">
+  <meta name="description" content="Paytium 5.0.3 → 5.0.5 — A discount code was rendered without output escaping in the administration panel in 5.0.3; the fix was verified in 5.0.5.">
   <meta name="theme-color" content="#0a0a0a">
   <title>Paytium 5.0.3 → 5.0.5 — poystick</title>
   <style>
@@ -36,134 +36,68 @@ pre{overflow:auto;margin:20px 0 28px;padding:18px;background:#0e0e0e;border:1px 
     <nav>
       <a href="../#writeups">write-ups</a>
       <a href="../#pocs">PoCs</a>
-      <a href="../methodology.html">metodologia de estudo</a>
-      <a href="../wordpress-methodology.html">metodologia WordPress</a>
-      <a href="../#sobre">sobre</a>
+      <a href="../methodology.html">study methodology</a>
+      <a href="../wordpress-methodology.html">WordPress methodology</a>
+      <a href="../#sobre">about</a>
       <a href="https://github.com/TarcisioLuchesi">github ↗</a>
     </nav>
   </header>
 
   <main class="article-shell">
     <section class="article-hero">
-      <div class="kicker">wordpress / stored xss / patch review</div>
+      <div class="kicker">WordPress / stored XSS / patch analysis</div>
       <h1>Paytium 5.0.3 → 5.0.5</h1>
-      <p class="hero-copy">Código de desconto refletido no painel sem escape em 5.0.3; correção confirmada em 5.0.5.</p>
+      <p class="hero-copy">A discount code was rendered without output escaping in the administration panel in 5.0.3; the fix was verified in 5.0.5.</p>
       <div class="article-meta">
         <span>Stored XSS</span>
         <span>WordPress</span>
         <span>PHP</span>
         <span>Admin UI</span>
-        <span>corrigido em 5.0.5</span>
+        <span>fixed in 5.0.5</span>
       </div>
       <div class="article-meta">
-        <span>Pesquisa: Tarcísio Luchesi (Poystick)</span>
-        <span>Ambiente: laboratório autorizado</span>
-        <span>CVE: não atribuído</span>
+        <span>Research: Tarcísio Luchesi (Poystick)</span>
+        <span>Environment: authorized lab</span>
+        <span>CVE: not assigned</span>
       </div>
     </section>
 
     <article class="article">
-      <p>
-        Esta é uma análise de regressão entre o Paytium 5.0.3 e o Paytium 5.0.5.
-        O objetivo foi verificar se um valor controlável relacionado a descontos alcançava
-        um sink HTML inseguro e se a versão posterior neutralizava o mesmo caminho.
-      </p>
 
-      <div class="note">
-        <strong>Conclusão curta:</strong> o caminho do código de desconto era vulnerável a
-        XSS armazenado no painel administrativo em 5.0.3. Na cópia 5.0.5 revisada, o sink
-        passou a usar <code>esc_html()</code>. Portanto, este caso é documentado como
-        corrigido em 5.0.5, sem alegar uma nova CVE.
-      </div>
-
-      <h2>O fluxo vulnerável em 5.0.3</h2>
-      <p>
-        No processamento do pagamento, o Paytium monta os dados do desconto a partir do
-        formulário. Entre esses dados está o código do desconto, associado ao campo
-        <code>discount_code</code>.
-      </p>
-
-      <pre><code>$discount_data = array(
+<p>This is a regression analysis comparing Paytium versions 5.0.3 and 5.0.5. I examined whether attacker-controlled discount data reached an unsafe HTML sink and whether the newer version prevented that behavior.</p>
+<p><strong>Finding:</strong> Paytium 5.0.3 rendered stored discount codes in an administration screen without HTML escaping. The reviewed 5.0.5 code uses <code>esc_html()</code> at the same sink. This case is documented as fixed, and no new CVE is claimed.</p>
+<h2>The vulnerable flow in 5.0.3</h2>
+<p>During payment processing, the plugin builds discount information from the submitted form, including the <code>discount_code</code> field:</p>
+<pre><code>$discount_data = array(
     'discount_code' =&gt; $_POST['pt-discount']['code'],
     // ...
 );</code></pre>
-
-      <p>
-        O valor é persistido junto aos dados do pagamento. Mais tarde, a tela de detalhes
-        da assinatura recupera esse valor por meio de
-        <code>$payment-&gt;get_discount_code()</code> e o concatena diretamente no HTML.
-      </p>
-
-      <pre><code>echo $payment-&gt;get_discount_value()
+<p>The value is persisted with the payment details. Later, the subscription detail screen retrieves it using <code>$payment->get_discount_code()</code> and concatenates it directly into HTML:</p>
+<pre><code>echo $payment-&gt;get_discount_value()
     . ' (code: ' . $payment-&gt;get_discount_code() . ')';</code></pre>
-
-      <p>
-        Esse <code>echo</code> é o sink final: o conteúdo controlado termina em um contexto
-        de texto HTML sem escape de saída. Quando um administrador abre o detalhe da
-        assinatura que contém o valor armazenado, o navegador interpreta a marcação como
-        parte da página.
-      </p>
-
-      <div class="flow">entrada do código de desconto
-  ↓
-dados do pagamento
-  ↓
-persistência do pagamento
-  ↓
-get_discount_code()
-  ↓
-echo dentro de subscription-details.php
-  ↓
-HTML do painel administrativo</div>
-
-      <h2>Correção confirmada em 5.0.5</h2>
-      <p>
-        Na versão 5.0.5 comparada no laboratório, o mesmo ponto foi alterado para escapar
-        o valor antes da saída:
-      </p>
-
-      <pre><code>echo esc_html(
+<p>This output is the final sink. The browser can interpret user-controlled markup in an administrator's page rather than displaying it as text.</p>
+<div class="flow">Discount code input → payment data → persisted payment → get_discount_code() → subscription-details.php output → admin HTML</div>
+<h2>Fix verified in version 5.0.5</h2>
+<p>The same sink was changed to apply contextual HTML escaping:</p>
+<pre><code>echo esc_html(
     $payment-&gt;get_discount_value()
     . ' (code: ' . $payment-&gt;get_discount_code() . ')'
 );</code></pre>
-
-      <p>
-        A correção é relevante porque ocorre no sink e no contexto correto. Mesmo que um
-        valor antigo permaneça no banco de dados, ele deixa de ser interpretado como HTML
-        nessa tela. O resultado esperado é a exibição literal dos caracteres especiais,
-        em vez da execução de JavaScript.
-      </p>
-
-      <h2>PoC segura para laboratório</h2>
-      <p>
-        A validação foi feita apenas em uma instalação própria. O marcador utilizado para
-        confirmar a hipótese foi um valor inofensivo com caracteres HTML:
-      </p>
-
-      <pre><code>&lt;img src=x onerror=alert(document.domain)&gt;</code></pre>
-
-      <p>
-        Em 5.0.3, o valor armazenado alcançava o detalhe da assinatura como marcação.
-        Em 5.0.5, a mesma sequência deve aparecer como texto escapado, por exemplo
-        <code>&amp;lt;img ...&amp;gt;</code>, sem execução. A PoC não deve ser usada contra
-        sites de terceiros e não inclui cookies, tokens ou credenciais.
-      </p>
-
-      <h2>Boas práticas de correção</h2>
-      <p>
-        A correção mínima é aplicar escape contextual no ponto de saída: <code>esc_html()</code>
-        para texto, <code>esc_attr()</code> para atributos e <code>esc_url()</code> para URLs.
-        Também é recomendável validar a estrutura dos dados na entrada, restringir chaves
-        de metadados a uma allowlist e testar cada caminho de persistência até seu sink final.
-      </p>
-
-      <a class="back-link" href="../">← voltar</a>
-    </article>
+<p>Escaping at the output prevents previously stored special characters from being interpreted as active HTML in that view.</p>
+<h2>Safe laboratory PoC</h2>
+<p>I validated the behavior only in a controlled installation using a simple HTML marker:</p>
+<pre><code>&lt;img src=x onerror=alert(document.domain)&gt;</code></pre>
+<p>In 5.0.3, the stored value reached the subscription view as markup. In 5.0.5, the expected behavior is escaped text rather than script execution. The PoC does not involve cookies, secrets, or testing third-party systems.</p>
+<h2>Remediation practices</h2>
+<p>Escape data for its exact output context: <code>esc_html()</code> for text nodes, <code>esc_attr()</code> for HTML attributes, and <code>esc_url()</code> for URLs. Validate input structures, allowlist permitted metadata keys, and trace persisted data to every output sink.</p>
+<a class="back-link" href="../">← back to blog</a>
+</article>
   </main>
 
   <footer class="site-footer" style="width:min(760px,calc(100% - 40px));margin:0 auto;padding:28px 0 42px;color:#606060;font-size:12px">
     <span>poystick</span>
     <span>Paytium 5.0.3 → 5.0.5</span>
   </footer>
+  <script src="../assets/i18n.js" defer></script>
 </body>
 </html>
