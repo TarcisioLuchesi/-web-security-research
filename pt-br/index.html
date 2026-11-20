@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Poystick — pesquisa de segurança em WordPress, write-ups e provas de conceito.">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>poystick</title>
+  <style>
+:root{
+  --bg:#0a0a0a;
+  --surface:#111111;
+  --text:#e9e9e9;
+  --muted:#8b8b8b;
+  --line:#242424;
+  --red:#ff3434;
+  --blue:#3d5afe;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  font-size:15px;
+  line-height:1.65;
+}
+
+a{color:inherit;text-decoration:none}
+
+.wrap{
+  width:min(820px,calc(100% - 40px));
+  margin:0 auto;
+}
+
+.site-header{
+  width:min(900px,calc(100% - 32px));
+  margin:0 auto;
+  min-height:72px;
+  padding:14px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+
+.logo{
+  font-weight:700;
+  font-size:18px;
+}
+
+.logo span{color:var(--red)}
+
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:8px 18px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+nav a:hover{color:var(--text)}
+
+.intro{
+  padding:110px 0 90px;
+  border-bottom:1px solid var(--line);
+}
+
+.label{
+  margin:0 0 18px;
+  color:var(--blue);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+h1{
+  margin:0 0 24px;
+  font-size:clamp(48px,10vw,88px);
+  line-height:.95;
+  letter-spacing:-.07em;
+}
+
+.lead{
+  max-width:680px;
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:20px;
+  line-height:1.6;
+  color:#d1d1d1;
+}
+
+.small{
+  max-width:620px;
+  margin:22px 0 0;
+  color:var(--muted);
+}
+
+.section{
+  padding:72px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.section-title{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:28px;
+}
+
+.section-title h2{
+  margin:0;
+  font-size:17px;
+}
+
+.section-title span{
+  color:#666;
+  font-size:12px;
+}
+
+.post-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:24px;
+  padding:26px 0;
+  border-top:1px solid var(--line);
+}
+
+.post-row:hover h3{color:var(--red)}
+.post-row:hover .arrow{color:var(--blue);transform:translateX(4px)}
+
+.post-date{
+  margin:0 0 10px;
+  color:#666;
+  font-size:12px;
+}
+
+.method-filter,
+.origin-filter{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:28px 0 0;
+}
+
+.origin-filter{
+  margin-top:12px;
+}
+
+.method-filter button,
+.origin-filter button{
+  cursor:pointer;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  background:#0e0e0e;
+  color:#888;
+  font:12px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.method-filter button:hover,
+.method-filter button.active,
+.origin-filter button:hover,
+.origin-filter button.active{
+  border-color:var(--blue);
+  color:#f0f0f0;
+}
+
+.method-badge{
+  display:inline-block;
+  margin-left:8px;
+  padding:2px 7px;
+  border:1px solid var(--blue);
+  color:#aeb8ff;
+  font-size:11px;
+  line-height:1.4;
+  vertical-align:middle;
+}
+
+.method-note{
+  max-width:680px;
+  margin:12px 0 0;
+  color:#707070;
+  font-size:12px;
+}
+
+.post-row h3{
+  margin:0 0 10px;
+  font-size:18px;
+  line-height:1.45;
+  transition:color .15s ease;
+}
+
+.post-row p{
+  margin:0;
+  color:var(--muted);
+  max-width:690px;
+}
+
+.arrow{
+  align-self:center;
+  color:#777;
+  font-size:24px;
+  transition:.15s ease;
+}
+
+.about p{
+  max-width:700px;
+  color:#aaa;
+}
+
+.quote-list{
+  margin:0;
+  padding-left:26px;
+  color:#c9c9c9;
+}
+
+.quote-list li{padding:8px 0;}
+
+
+.site-footer{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:28px 0 42px;
+  color:#606060;
+  font-size:12px;
+}
+
+/* article */
+
+.article-shell{
+  width:min(760px,calc(100% - 40px));
+  margin:0 auto;
+  padding:80px 0 100px;
+}
+
+.article-hero{
+  padding:20px 0 48px;
+  border-bottom:1px solid var(--line);
+}
+
+.article-hero .kicker{
+  color:var(--blue);
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+.article-hero h1{
+  margin:14px 0 12px;
+  font-size:clamp(40px,8vw,70px);
+}
+
+.hero-copy{
+  margin:0;
+  color:#bbb;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:18px;
+  line-height:1.6;
+}
+
+.article-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:22px;
+}
+
+.article-meta span{
+  padding:4px 8px;
+  border:1px solid var(--line);
+  color:#777;
+  font-size:12px;
+}
+
+.article{
+  padding-top:42px;
+  color:#c2c2c2;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.8;
+}
+
+.article h2{
+  margin:52px 0 12px;
+  color:#f1f1f1;
+  font:700 21px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.article p code{
+  padding:2px 5px;
+  background:#151515;
+  border:1px solid var(--line);
+  border-radius:4px;
+  color:#eee;
+}
+
+pre{
+  overflow:auto;
+  margin:20px 0 28px;
+  padding:18px;
+  background:#0e0e0e;
+  border:1px solid var(--line);
+  border-left:3px solid var(--blue);
+  color:#d7d7d7;
+  font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.flow{
+  white-space:pre-wrap;
+  margin:24px 0;
+  padding:20px;
+  background:#0e0e0e;
+  border:1px solid var(--line);
+  border-left:3px solid var(--red);
+  color:#ddd;
+  font:13px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.back-link{
+  display:inline-block;
+  margin-top:40px;
+  color:#888;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.back-link:hover{color:var(--red)}
+
+@media(max-width:600px){
+  .site-header{align-items:flex-start;padding:18px 0}
+  nav{gap:12px;flex-wrap:wrap;justify-content:flex-end}
+  .intro{padding:76px 0 64px}
+  .lead{font-size:18px}
+  .site-footer{flex-direction:column}
+}
+
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="logo" href="./">poystick<span>.</span></a>
+    <nav>
+      <a href="#perfis">perfis de pesquisa</a>
+      <a href="#writeups">write-ups</a>
+      <a href="#pocs">PoCs</a>
+      <a href="methodology.html">metodologia de estudo</a>
+      <a href="wordpress-methodology.html">metodologia WordPress</a>
+      <a href="pressupostos/">pressupostos</a>
+      <a href="#anonymous">Anonymous e saúde mental</a>
+      <a href="#acoes-sociais">ações sociais</a>
+
+      <a href="#frases">frases em que acredito</a>
+      <a href="#filosofia">filosofia</a>
+      <a href="#sobre">sobre</a>
+      <a href="https://github.com/TarcisioLuchesi">github ↗</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <p class="label">security research / web applications</p>
+      <h1>Poystick</h1>
+      <p class="lead">
+        Sou pesquisador de segurança com foco em aplicações web, plugins e temas WordPress.
+        Aqui eu publico algumas análises, CVEs, anotações de code review e PoCs.
+      </p>
+      <p class="small">
+        Tento registrar principalmente o que encontrei no código, como validei e onde a proteção falhou.
+      </p>
+
+      <div class="method-filter" aria-label="Filtrar publicações pelo método de pesquisa">
+        <button type="button" class="active" data-filter="all">Todos</button>
+        <button type="button" data-filter="manual">Manual</button>
+        <button type="button" data-filter="ai-assisted">AI-Assisted</button>
+        <button type="button" data-filter="automated">Automated</button>
+      </div>
+      <p class="method-note">
+        Manual = pesquisa conduzida manualmente. AI-Assisted = IA participa do processo e o resultado é validado.
+        Automated = descoberta originada por pipeline ou automação.
+      </p>
+
+      <div class="origin-filter" aria-label="Filtrar publicações por autoria da vulnerabilidade">
+        <button type="button" class="active" data-origin-filter="all">Todas</button>
+        <button type="button" data-origin-filter="own">Pesquisas próprias</button>
+        <button type="button" data-origin-filter="third-party">Terceiros</button>
+        <button type="button" data-origin-filter="educational">Educacionais</button>
+      </div>
+      <p class="method-note">
+        Pesquisas próprias = análises, relatos e CVEs atribuídos a Tarcísio Luchesi (Poystick).
+        Terceiros = vulnerabilidades descobertas por outros hunters. Educacionais = fundamentos e metodologias, sem atribuição de falha.
+      </p>
+    </section>
+
+    <section id="perfis" class="section">
+      <div class="section-title">
+        <h2>Perfis de pesquisa</h2>
+        <span>Patchstack / Wordfence</span>
+      </div>
+
+      <a class="post-row" href="https://patchstack.com/database/researchers/2a640aab-c775-44da-91f8-df6b213fdd4f" target="_blank" rel="noopener noreferrer">
+        <div>
+          <h3>Patchstack — Tarcísio Luchesi (Poystick)</h3>
+          <p>
+            Perfil público de pesquisador com relatórios e vulnerabilidades de segurança
+            em plugins WordPress.
+          </p>
+        </div>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="post-row" href="https://www.wordfence.com/threat-intel/vulnerabilities/researchers/tarcisio-luchesi-de-almeida-silva-poystick?sortby=date&amp;sort=asc" target="_blank" rel="noopener noreferrer">
+        <div>
+          <h3>Wordfence Intelligence — Tarcísio Luchesi (Poystick)</h3>
+          <p>
+            Página de pesquisador na base de inteligência de vulnerabilidades da Wordfence.
+          </p>
+        </div>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+    </section>
+
+    <section id="pressupostos" class="section">
+      <div class="section-title">
+        <h2>Pressupostos e hipóteses</h2>
+        <span>caderno de pesquisa</span>
+      </div>
+      <p class="method-note" style="margin:0 0 22px;max-width:700px">
+        Registro como uma observação se torna uma hipótese verificável. A origem do raciocínio
+        é identificada com clareza, sem confundir ideias com vulnerabilidades confirmadas.
+      </p>
+      <a class="post-row" href="pressupostos/#manual">
+        <div>
+          <p class="post-date">01 / RACIOCÍNIO PRÓPRIO</p>
+          <h3>Pressupostos manuais</h3>
+          <p>Observações, hipóteses, testes controlados e limites do que foi demonstrado.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="post-row" href="pressupostos/#ia">
+        <div>
+          <p class="post-date">02 / RACIOCÍNIO ASSISTIDO</p>
+          <h3>Pressupostos com ajuda da IA</h3>
+          <p>A IA ajuda a explorar alternativas e revisar premissas; a conclusão depende de validação independente.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </section>
+
+    <section id="writeups" class="section">
+      <div class="section-title">
+        <h2>Write-ups</h2>
+        <span>09 publicações</span>
+      </div>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/base64-decode-after-validation-xss-hypothesis.html">
+        <div>
+          <p class="post-date">2026-11-20 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Hipótese · não confirmada</span></p>
+          <h3>Base64, validação antecipada e XSS: quando o texto muda depois do filtro</h3>
+          <p>Investigação sobre decodificação após a validação, sinks HTML e os limites da hipótese de bypass de sanitização, sem alegar uma falha comprovada no Gmail.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/bugpay-cors-2fa-cross-origin.html">
+        <div>
+          <p class="post-date">2026-11-19 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Pesquisa própria · Low</span></p>
+          <h3>BugPay — CORS permissivo em endpoint 2FA: análise e reteste</h3>
+          <p>
+            Leitura cross-origin no início do desafio 2FA, limites de impacto, reteste com origem
+            restrita e conclusão do reporte autorizado para divulgação.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/xss-refletido-php-waf-dotless-base64.html">
+        <div>
+          <p class="post-date">2026-11-08 <span class="method-badge">AI-Assisted</span> <span class="method-badge">CVE própria · Poystick</span></p>
+          <h3>CVE-2026-61957 — XSS refletido no miniOrange OTP Verification ≤ 5.5.1</h3>
+          <p>
+            Como investiguei a reflexão de chaves GET no HTML e a normalização de nomes
+            pelo PHP, com payload dotless em Base64. CVSS 7.1; corrigido na versão 5.5.2.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="educational" href="research/icegram-collect-1.3.21-review-url-sem-escape.html">
+        <div>
+          <p class="post-date">2026-11-01 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Análise estática</span></p>
+          <h3>Icegram Collect 1.3.21 — de review_url ao sink HTML</h3>
+          <p>
+            Do hook admin_notices ao meta refresh: o valor chega sem escape ao atributo HTML,
+            mas não há exploração por usuário externo demonstrada.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="third-party" href="research/cve-2026-33938-handlebars-ctf.html">
+        <div>
+          <p class="post-date">2026-10-13 <span class="method-badge">AI-Assisted</span> <span class="method-badge">CTF / CVE de terceiros</span></p>
+          <h3>CVE-2026-33938 — Prototype Pollution até possível RCE no Handlebars</h3>
+          <p>
+            Análise do fluxo do template ao worker, bypass da allowlist e mutação de @partial-block.
+            Inclui AST, code injection e uma PoC candidata ainda sem confirmação de RCE no CTF.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="third-party" href="research/steam-chat-xss-to-rce.html">
+        <div>
+          <p class="post-date">2026-10-04 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Validado por Tarcísio Luchesi (Poystick)</span></p>
+          <h3>Do XSS ao RCE no Steam Chat — React, BBCode, CEF e custom URI</h3>
+          <p>
+            Artigo didático criado com IA e tecnicamente revisado/validado por mim, reconstruindo a cadeia
+            de uma falha pública de terceiro desde as primitives de XSS/URL até a fronteira nativa e o RCE.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="educational" href="research/black-box-newsletter-consent.html">
+        <div>
+          <p class="post-date">2026-10-07 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Material educativo</span></p>
+          <h3>Do formulário à API — análise black box de integrações de newsletter</h3>
+          <p>
+            Dos fundamentos cliente-servidor ao controle de parâmetros, trust boundaries,
+            validação segura e autorização em backends sem CMS.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/cve-2025-15285.html">
+        <div>
+          <p class="post-date">2026-09-23 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Tarcísio Luchesi (Poystick)</span></p>
+          <h3>CVE-2025-15285 — Missing Authorization no SEO Flow ≤ 2.2.1</h3>
+          <p>
+            O plugin verifica um HMAC inválido, retorna um WP_Error e depois ignora esse retorno.
+            A execução continua até funções como wp_insert_post().
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="research/paytium-5-0-3-5-0-5-xss.html">
+        <div>
+          <p class="post-date">2026-09-24 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Tarcísio Luchesi (Poystick)</span></p>
+          <h3>Paytium 5.0.3 → 5.0.5 — XSS armazenado no código de desconto</h3>
+          <p>
+            Revisão do sink sem escape em 5.0.3 e confirmação da correção com esc_html()
+            em 5.0.5, com limites claros sobre o que foi e não foi corrigido.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </section>
+
+    <section id="pocs" class="section">
+      <div class="section-title">
+        <h2>PoCs</h2>
+        <span>01 publicado</span>
+      </div>
+
+      <a class="post-row" data-method="ai-assisted" data-origin="own" href="pocs/cve-2025-15285.html">
+        <div>
+          <p class="post-date">2026-09-23 <span class="method-badge">AI-Assisted</span> <span class="method-badge">Tarcísio Luchesi (Poystick)</span></p>
+          <h3>CVE-2025-15285 — PoC interativa em Python</h3>
+          <p>
+            Demonstra em laboratório a criação, modificação e exclusão de posts,
+            além da criação de categorias, usando um HMAC deliberadamente inválido.
+          </p>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </section>
+
+    <section id="anonymous" class="section about">
+      <div class="section-title">
+        <h2>Anonymous — uma causa pela saúde mental</h2>
+        <span>manifesto pessoal</span>
+      </div>
+      <p><strong>A saúde mental é mais importante que qualquer conquista, status ou reconhecimento.</strong></p>
+      <p>
+        Pretendo me aproximar dos ideais associados à Anonymous por uma causa social:
+        defender a saúde mental, combater o preconceito e incentivar o acolhimento
+        e o acesso a cuidados para quem precisa. Quero usar minha voz e meus conhecimentos
+        em tecnologia para conscientização, solidariedade e educação.
+      </p>
+    </section>
+
+    <section id="acoes-sociais" class="section about">
+      <div class="section-title">
+        <h2>Ações sociais</h2>
+        <span>saúde mental</span>
+      </div>
+      <p>Essa aba irá mostrar todos os feitos que eu realizei por uma causa social com foco em saúde mental.</p>
+    </section>
+
+    <section id="frases" class="section about">
+      <div class="section-title">
+        <h2>Frases em que acredito na área de hacking</h2>
+        <span>reflexões de Poystick</span>
+      </div>
+      <ol class="quote-list">
+        <li>"If you work with hypotheses, you could be the best hacker in the world" — by poystick</li>
+        <li>Soft skill &gt; hard skill — by poystick</li>
+        <li>Não tem como ser 100% perfeito — by poystick</li>
+              <li>"Toda vulnerabilidade começa com uma hipótese." — by poystick</li>
+        <li>"Um bom hacker não sabe tudo, mas sabe investigar." — by poystick</li>
+        <li>"A curiosidade é mais importante do que decorar ferramentas." — by poystick</li>
+        <li>"Errar faz parte da pesquisa; não aprender com o erro é uma escolha." — by poystick</li>
+        <li>"A inteligência artificial não substitui o raciocínio humano, ela o amplia." — by poystick</li>
+        <li>"Não é necessário ser um gênio para descobrir algo que ninguém percebeu." — by poystick</li>
+        <li>"Uma hipótese só se torna conhecimento quando é testada." — by poystick</li>
+        <li>"O melhor hacker não é aquele que explora mais, mas aquele que compreende melhor." — by poystick</li>
+        <li>"Conhecimento técnico sem ética pode se tornar um problema." — by poystick</li>
+        <li>"Questionar o óbvio é o primeiro passo para descobrir o inesperado." — by poystick</li>
+              <li>"Não seja apenas um decorador de padrões. Decorar é diferente de aprender. No hacking e em outras áreas, reproduzir sem compreender pode limitar seu desenvolvimento. Busque a essência do conhecimento: entenda o porquê, não apenas o como, e tente encontrar a mesma solução de diferentes maneiras." — by poystick</li>
+      </ol>
+    </section>
+
+    <section id="filosofia" class="section about">
+      <div class="section-title">
+        <h2>Filosofia</h2>
+      </div>
+
+      <p>
+        <strong>Aprender construindo, usar IA para aumentar minha capacidade, entender por engenharia reversa
+        e recorrer à teoria quando ela se torna necessária.</strong>
+      </p>
+
+      <p>
+        Minha forma de estudar é orientada por projetos e por problemas reais. Em vez de esperar dominar toda
+        a teoria antes de começar, prefiro construir, testar, analisar o resultado e aprofundar os conceitos
+        sob demanda. A IA faz parte desse processo como ferramenta de aceleração: pode ajudar a gerar hipóteses,
+        analisar código, criar rascunhos, automações e PoCs, mas o resultado precisa ser entendido e validado.
+      </p>
+
+      <p>
+        <strong>Na cibersegurança, não quero apenas caçar bounty; quero entender vulnerabilidades,
+        produzir pesquisa útil e me tornar muito bom em um nicho específico.</strong>
+      </p>
+
+      <p>
+        Para mim, CVEs, exploits, write-ups, ferramentas e pesquisa prática são também formas de aprendizagem.
+        Quanto mais eu investigo uma vulnerabilidade, mais a teoria deixa de ser algo abstrato e passa a fazer
+        parte do trabalho real.
+      </p>
+
+      <p>
+        Também acredito que conhecimento em segurança deve circular. Compartilhar metodologia, explicar padrões
+        e ajudar outras pessoas a aprender aumenta a quantidade de gente capaz de pesquisar e proteger sistemas.
+      </p>
+    </section>
+
+    <section id="sobre" class="section about">
+      <div class="section-title">
+        <h2>Sobre</h2>
+      </div>
+      <p>
+        Meu foco atual é pesquisa de vulnerabilidades em WordPress. Normalmente começo pela
+        superfície exposta pelo plugin, sigo o fluxo dos dados até um sink sensível e depois
+        valido a hipótese em laboratório.
+      </p>
+      <p>
+        Este site é só um lugar para organizar o que eu estiver estudando e publicando.
+        PoCs e testes descritos aqui são voltados a ambientes próprios ou autorizados.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap">
+    <span>poystick</span>
+    <span>GitHub: TarcisioLuchesi</span>
+  </footer>
+
+  <script>
+    const filterButtons = document.querySelectorAll('.method-filter button');
+    const originButtons = document.querySelectorAll('.origin-filter button');
+    const posts = document.querySelectorAll('.post-row[data-method][data-origin]');
+
+    let activeMethod = 'all';
+    let activeOrigin = 'all';
+
+    function applyFilters() {
+      posts.forEach(post => {
+        const methodMatches = activeMethod === 'all' || post.dataset.method === activeMethod;
+        const originMatches = activeOrigin === 'all' || post.dataset.origin === activeOrigin;
+        post.style.display = methodMatches && originMatches ? 'grid' : 'none';
+      });
+    }
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        activeMethod = button.dataset.filter;
+        filterButtons.forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        applyFilters();
+      });
+    });
+
+    originButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        activeOrigin = button.dataset.originFilter;
+        originButtons.forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        applyFilters();
+      });
+    });
+  </script>
+  <script src="../assets/i18n.js" defer></script>
+</body>
+</html>
