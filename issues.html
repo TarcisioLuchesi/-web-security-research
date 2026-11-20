@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Security documentation issues and research proposals by Tarcísio Luchesi (P0ystick).">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>GitHub Issues — Poystick</title>
+  <style>
+    :root{--bg:#0a0a0a;--surface:#111;--text:#e9e9e9;--muted:#9a9a9a;--line:#242424;--red:#ff3434;--blue:#3d5afe}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:15px;line-height:1.65}
+    a{color:inherit;text-decoration:none}
+    a:focus-visible{outline:2px solid #8ba0ff;outline-offset:4px}
+    .wrap{width:min(820px,calc(100% - 40px));margin:0 auto}
+    .site-header{width:min(900px,calc(100% - 32px));margin:0 auto;min-height:72px;padding:14px 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .logo{font-size:18px;font-weight:700}.logo span{color:var(--red)}
+    nav{display:flex;flex-wrap:wrap;gap:12px 20px;color:var(--muted);font-size:13px}
+    nav a:hover,.issue-foot a:hover{color:var(--text)}nav [aria-current="page"]{color:var(--text)}
+    .intro{padding:88px 0 50px;border-bottom:1px solid var(--line)}
+    .label{margin:0 0 18px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--blue)}
+    h1{font-size:clamp(40px,9vw,72px);line-height:1;letter-spacing:-.06em;margin:0 0 24px}
+    .lead{font-family:Inter,system-ui,sans-serif;color:#d1d1d1;font-size:19px;line-height:1.6;max-width:750px;margin:0}
+    .note{margin:22px 0 0;color:var(--muted);font-size:13px}
+    .summary{display:flex;flex-wrap:wrap;gap:16px;margin-top:34px;font-size:12px;color:var(--muted)}
+    .summary strong{font-size:18px;color:var(--text);margin-right:5px}
+    .list{padding:24px 0 80px;display:grid;gap:14px}
+    .issue{background:var(--surface);border:1px solid var(--line);padding:23px 26px}
+    .issue:hover{border-color:#414141}
+    .issue-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;letter-spacing:.035em}
+    .source{color:#a4aeff}.status{color:var(--muted);border:1px solid #444;padding:1px 9px;border-radius:99px;white-space:nowrap}
+    .status.open{border-color:#344a38;color:#a5c5aa}.status.closed{border-color:#56463b;color:#cbb298}
+    .issue h2{font-size:17px;line-height:1.45;margin:15px 0 8px;font-weight:650}
+    .issue h2 a:hover{color:var(--red)}
+    .issue h2 span{font-size:13px;color:var(--red)}
+    .issue p{color:#bababa;font-size:13px;margin:0 0 16px}
+    .issue-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--muted)}
+    .site-footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;padding:28px 0 42px}
+    @media(max-width:600px){.site-header{align-items:flex-start;padding:18px 0}nav{gap:10px;justify-content:flex-end}.intro{padding:60px 0 40px}.issue{padding:20px}.lead{font-size:17px}.site-footer{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="logo" href="./">poystick<span>.</span></a>
+    <nav aria-label="Main navigation">
+      <a href="./">home</a>
+      <a href="methodology.html">methodology</a>
+      <a href="pressupostos/">hypotheses</a>
+      <a href="issues.html" aria-current="page">GitHub Issues</a>
+      <a href="https://github.com/TarcisioLuchesi" target="_blank" rel="noopener noreferrer">github ↗</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <section class="intro">
+      <p class="label">security research / open documentation</p>
+      <h1>GitHub Issues<span style="color:var(--red)">.</span></h1>
+      <p class="lead">Proposals, technical discussions, and suggestions submitted to projects such as OWASP and MITRE ATT&amp;CK. Each card links to the original GitHub discussion.</p>
+      <div class="summary"><span><strong>7</strong>research issues</span><span><strong>6</strong>open</span><span><strong>1</strong>closed</span></div>
+      <p class="note">Statuses checked on Nov 20, 2026. Opening an issue does not imply approval, incorporation, or endorsement by the maintaining organization.</p>
+    </section>
+    <section class="list" aria-label="Research issues">
+  <article class="issue">
+    <div class="issue-meta"><span class="source">OWASP / Cheat Sheet Series</span><span class="status open">Open</span></div>
+    <h2><a href="https://github.com/OWASP/CheatSheetSeries/issues/3023" target="_blank" rel="noopener noreferrer">Cloudflare WAF evasion via URL encoding and JavaScript comments <span aria-hidden="true">↗</span></a></h2>
+    <p>Proposal to extend XSS Filter Evasion guidance; bypass details and impact require independent validation.</p>
+    <div class="issue-foot"><span>Issue #3023</span><a href="https://github.com/OWASP/CheatSheetSeries/issues/3023" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+  <article class="issue">
+    <div class="issue-meta"><span class="source">OWASP / AI Testing Guide</span><span class="status open">Open</span></div>
+    <h2><a href="https://github.com/OWASP/www-project-ai-testing-guide/issues/98" target="_blank" rel="noopener noreferrer">HTTP request and response tampering in AI-powered web applications <span aria-hidden="true">↗</span></a></h2>
+    <p>Testing trust boundaries and conversation-history integrity when HTTP messages are modified.</p>
+    <div class="issue-foot"><span>Issue #98</span><a href="https://github.com/OWASP/www-project-ai-testing-guide/issues/98" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+  <article class="issue">
+    <div class="issue-meta"><span class="source">OWASP / Cheat Sheet Series</span><span class="status open">Open</span></div>
+    <h2><a href="https://github.com/OWASP/CheatSheetSeries/issues/3021" target="_blank" rel="noopener noreferrer">LLM prompt injection prevention and client-side guardrails <span aria-hidden="true">↗</span></a></h2>
+    <p>Discussion about strengthening LLM security guidance and server-side enforcement.</p>
+    <div class="issue-foot"><span>Issue #3021</span><a href="https://github.com/OWASP/CheatSheetSeries/issues/3021" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+  <article class="issue">
+    <div class="issue-meta"><span class="source">MITRE ATT&amp;CK</span><span class="status open">Open</span></div>
+    <h2><a href="https://github.com/mitre-attack/attack-stix-data/issues/81" target="_blank" rel="noopener noreferrer">PhantomRaven supply-chain compromise and bug bounty monetization <span aria-hidden="true">↗</span></a></h2>
+    <p>Suggested ATT&amp;CK procedure documentation involving a supply-chain case and bounty incentives.</p>
+    <div class="issue-foot"><span>Issue #81</span><a href="https://github.com/mitre-attack/attack-stix-data/issues/81" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+  <article class="issue">
+    <div class="issue-meta"><span class="source">OWASP / Web Security Testing Guide</span><span class="status open">Open</span></div>
+    <h2><a href="https://github.com/OWASP/wstg/issues/1731" target="_blank" rel="noopener noreferrer">XSS through Base64 decoding after input validation <span aria-hidden="true">↗</span></a></h2>
+    <p>Proposal for testing the order of validation and decoding in XSS defenses.</p>
+    <div class="issue-foot"><span>Issue #1731</span><a href="https://github.com/OWASP/wstg/issues/1731" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+  <article class="issue">
+    <div class="issue-meta"><span class="source">OWASP / Web Security Testing Guide</span><span class="status open">Open</span></div>
+    <h2><a href="https://github.com/OWASP/wstg/issues/1723" target="_blank" rel="noopener noreferrer">Upload metadata expiration, file reuse, and MIME sniffing <span aria-hidden="true">↗</span></a></h2>
+    <p>Enhancements to file-upload testing methodology and its edge cases.</p>
+    <div class="issue-foot"><span>Issue #1723</span><a href="https://github.com/OWASP/wstg/issues/1723" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+  <article class="issue">
+    <div class="issue-meta"><span class="source">OWASP / Web Security Testing Guide</span><span class="status closed">Closed</span></div>
+    <h2><a href="https://github.com/OWASP/wstg/issues/1711" target="_blank" rel="noopener noreferrer">Same-origin HTML injection and Origin-based CSRF defenses <span aria-hidden="true">↗</span></a></h2>
+    <p>Proposal about how same-origin HTML injection may undermine protections based only on the Origin header.</p>
+    <div class="issue-foot"><span>Issue #1711</span><a href="https://github.com/OWASP/wstg/issues/1711" target="_blank" rel="noopener noreferrer">View on GitHub →</a></div>
+  </article>
+    </section>
+  </main>
+  <footer class="site-footer wrap">
+    <span>poystick · Tarcísio Luchesi</span>
+    <span>Research documented transparently</span>
+  </footer>
+  <script src="assets/i18n.js" defer></script>
+</body>
+</html>
