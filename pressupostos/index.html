@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0a0a0a">
-  <meta name="description" content="Pressupostos e hipóteses de pesquisa em segurança web: raciocínio manual e raciocínio com apoio de inteligência artificial — Poystick.">
+  <meta name="description" content="Poystick research notebook: independent and AI-assisted testable web security hypotheses.">
   <title>Pressupostos de pesquisa — poystick</title>
   <style>
     :root{color-scheme:dark;--bg:#0a0a0a;--surface:#111;--text:#e9e9e9;--muted:#aaa;--line:#242424;--red:#ff3434;--blue:#7a8cff}
@@ -55,83 +55,83 @@
   <header class="site-header">
     <a class="logo" href="../" aria-label="Poystick, página inicial">poystick<span>.</span></a>
     <nav aria-label="Navegação principal">
-      <a href="../">início</a>
+      <a href="../">home</a>
       <a href="../#writeups">write-ups</a>
-      <a href="../methodology.html">metodologia</a>
-      <a href="https://github.com/TarcisioLuchesi/-web-security-research">repositório ↗</a>
+      <a href="../methodology.html">methodology</a>
+      <a href="https://github.com/TarcisioLuchesi/-web-security-research">repository ↗</a>
     </nav>
   </header>
   <main class="wrap">
     <section class="hero">
-      <p class="label">research notebook / hipóteses</p>
-      <h1>Pressupostos de pesquisa</h1>
-      <p class="lead">Como formulo, questiono e testo hipóteses em segurança web: tanto por raciocínio próprio quanto com a IA como ferramenta de análise, contraste e aprendizagem.</p>
-      <p class="disclaimer"><strong>Critério de evidência:</strong> um pressuposto não é uma vulnerabilidade confirmada. O que foi observado, reproduzido em laboratório e efetivamente demonstrado deve ser distinguido de possibilidades ainda não verificadas. O uso de IA não substitui essa validação.</p>
+      <p class="label">research notebook / hypotheses</p>
+      <h1>Research hypotheses</h1>
+      <p class="lead">How I develop, question, and test hypotheses in web security, using independent reasoning and AI for analysis, comparison, and learning.</p>
+      <p class="disclaimer"><strong>Evidence standard:</strong> A hypothesis is not a confirmed vulnerability. Observations, laboratory reproductions, and demonstrated results must be distinguished from unverified possibilities. AI does not replace that validation.</p>
     </section>
 
     <div class="tabs" role="tablist" aria-label="Origem do raciocínio">
-      <button id="tab-manual" class="tab" type="button" role="tab" aria-controls="manual" aria-selected="true" tabindex="0" data-tab="manual">01 / Raciocínio manual</button>
-      <button id="tab-ia" class="tab" type="button" role="tab" aria-controls="ia" aria-selected="false" tabindex="-1" data-tab="ia">02 / Raciocínio com IA</button>
+      <button id="tab-manual" class="tab" type="button" role="tab" aria-controls="manual" aria-selected="true" tabindex="0" data-tab="manual">01 / Independent reasoning</button>
+      <button id="tab-ia" class="tab" type="button" role="tab" aria-controls="ia" aria-selected="false" tabindex="-1" data-tab="ia">02 / AI-assisted reasoning</button>
     </div>
 
     <section id="manual" class="panel" role="tabpanel" aria-labelledby="tab-manual" tabindex="0">
-      <h2>Pressupostos elaborados manualmente</h2>
-      <p class="summary">A investigação começa por uma observação própria: uma entrada de usuário, uma fronteira de confiança ou um comportamento inesperado. A partir disso, proponho um mecanismo, tento refutá-lo e registro exatamente o que o experimento demonstrou.</p>
+      <h2>Independently developed hypotheses</h2>
+      <p class="summary">My investigation starts with an original observation: user-controlled input, a trust boundary, or unexpected behavior. I propose a mechanism, attempt to disprove it, and document exactly what the experiment shows.</p>
       <ol class="steps">
-        <li>Observar a funcionalidade e o comportamento real.</li>
-        <li>Formular uma hipótese causal verificável.</li>
-        <li>Projetar um teste controlado e possíveis contraexemplos.</li>
-        <li>Registrar evidências, limites e conclusão.</li>
+        <li>Observe functionality and actual behavior.</li>
+        <li>Formulate a testable causal hypothesis.</li>
+        <li>Design a controlled test and consider counterexamples.</li>
+        <li>Record evidence, limitations, and conclusions.</li>
       </ol>
-      <h3>Exemplo de linha de pesquisa</h3>
+      <h3>Example research direction</h3>
       <article class="entry">
-        <div class="meta"><span class="tag">HTML Injection / CSRF</span><span class="tag">Hipótese testada em cenário local</span></div>
-        <h3>HTML Injection e a confiança no cabeçalho Origin</h3>
-        <p><strong>Pergunta:</strong> se um formulário HTML for injetado dentro de uma aplicação, o navegador pode enviar uma ação de mudança de estado com a origem da própria aplicação, mesmo quando um formulário externo seria bloqueado?</p>
-        <p><strong>Raciocínio:</strong> uma defesa baseada apenas em comparar o cabeçalho Origin não distingue necessariamente a interface legítima de um formulário malicioso inserido no mesmo documento.</p>
-        <p><strong>Limite:</strong> o efeito depende da ação disponível, das permissões da vítima e de outras proteções. Não é prova automática de tomada de conta. Um cenário local não confirma a existência do problema em qualquer aplicação real.</p>
-        <p>Leitura relacionada: <a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener noreferrer">OWASP Web Security Testing Guide</a>.</p>
+        <div class="meta"><span class="tag">HTML Injection / CSRF</span><span class="tag">Hypothesis tested in a local scenario</span></div>
+        <h3>HTML Injection and trust in the Origin header</h3>
+        <p><strong>Question:</strong> If an HTML form is injected into an application, could the browser submit a state-changing action with that application's own origin, even if a form hosted elsewhere would be blocked?</p>
+        <p><strong>Reasoning:</strong> A defense that only compares Origin headers does not necessarily distinguish a legitimate interface from a malicious form inserted into the same document.</p>
+        <p><strong>Limitation:</strong> The effect depends on the available action, the victim's permissions, and other protections. It does not automatically establish account takeover. A local test cannot confirm the issue in an arbitrary real-world application.</p>
+        <p>Related reading: <a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener noreferrer">OWASP Web Security Testing Guide</a>.</p>
       </article>
       <div class="template">
-        <h3>O que documento em cada hipótese manual</h3>
+        <h3>What I document for each independent hypothesis</h3>
         <ul>
-          <li>Observação original e contexto autorizado.</li>
-          <li>Premissas, mecanismo proposto e resultado esperado.</li>
-          <li>Procedimento de teste e evidências reproduzíveis.</li>
-          <li>Contraexemplos, resultado e grau de confiança.</li>
+          <li>Original observation and authorized context.</li>
+          <li>Assumptions, proposed mechanism, and expected result.</li>
+          <li>Test procedure and reproducible evidence.</li>
+          <li>Counterexamples, results, and confidence level.</li>
         </ul>
       </div>
     </section>
 
     <section id="ia" class="panel" role="tabpanel" aria-labelledby="tab-ia" tabindex="0" hidden>
-      <h2>Pressupostos com apoio da inteligência artificial</h2>
-      <p class="summary">Eu defino o problema e uso a IA para explorar alternativas, revisar fluxos de código e apontar premissas que posso ter ignorado. O objetivo é fortalecer o pensamento crítico, não terceirizar conclusões: cada sugestão precisa ser confrontada com o código e com testes próprios.</p>
+      <h2>AI-assisted hypotheses</h2>
+      <p class="summary">I define the problem and use AI to explore alternatives, review code paths, and challenge assumptions I may have overlooked. The goal is to strengthen critical thinking, not outsource conclusions. Each suggestion must be checked against code and independent testing.</p>
       <ol class="steps">
-        <li>Descrever o comportamento e a questão técnica.</li>
-        <li>Solicitar hipóteses alternativas e objeções à IA.</li>
-        <li>Verificar manualmente código, requisições e condições.</li>
-        <li>Separar sugestões não comprovadas de evidência validada.</li>
+        <li>Describe the behavior and technical question.</li>
+        <li>Ask AI for alternative hypotheses and objections.</li>
+        <li>Manually verify code, requests, and conditions.</li>
+        <li>Separate unproven suggestions from validated evidence.</li>
       </ol>
-      <h3>Exemplos de investigação assistida</h3>
+      <h3>Examples of AI-assisted investigation</h3>
       <article class="entry">
-        <div class="meta"><span class="tag">CORS / 2FA</span><span class="tag">Write-up publicado</span></div>
-        <h3>Questionar o impacto de uma resposta cross-origin</h3>
-        <p>Em vez de presumir que uma configuração de CORS permissiva resulta em comprometimento de conta, a análise considera o que a resposta expõe, a autenticação exigida, o fluxo real do 2FA e os limites de impacto. As hipóteses são confrontadas com o reteste.</p>
-        <p><a href="../research/bugpay-cors-2fa-cross-origin.html">Ler análise e reteste sobre CORS em endpoint 2FA →</a></p>
+        <div class="meta"><span class="tag">CORS / 2FA</span><span class="tag">Published write-up</span></div>
+        <h3>Question the impact of a cross-origin response</h3>
+        <p>Rather than assuming permissive CORS causes account compromise, I analyze what the response exposes, what authentication it requires, the actual 2FA flow, and the limits of impact. Hypotheses are checked against retest evidence.</p>
+        <p><a href="../research/bugpay-cors-2fa-cross-origin.html">Read the analysis and retest of CORS on a 2FA endpoint →</a></p>
       </article>
       <article class="entry">
-        <div class="meta"><span class="tag">PHP / XSS</span><span class="tag">Write-up publicado</span></div>
-        <h3>Revisar a cadeia de entrada até o ponto de saída</h3>
-        <p>A IA pode sugerir caminhos de source-to-sink e variações de normalização de parâmetros. A conclusão, porém, depende de localizar o comportamento no código, confirmar o contexto de saída e reproduzir o resultado.</p>
-        <p><a href="../research/xss-refletido-php-waf-dotless-base64.html">Ler estudo sobre nomes de parâmetros e XSS refletido →</a></p>
+        <div class="meta"><span class="tag">PHP / XSS</span><span class="tag">Published write-up</span></div>
+        <h3>Review the input-to-output chain</h3>
+        <p>AI can suggest source-to-sink paths and parameter-normalization variants. Conclusions still depend on locating the behavior in code, confirming the output context, and reproducing the result.</p>
+        <p><a href="../research/xss-refletido-php-waf-dotless-base64.html">Read the study on parameter names and reflected XSS →</a></p>
       </article>
       <div class="template">
-        <h3>O que documento em cada hipótese assistida por IA</h3>
+        <h3>What I document for each AI-assisted hypothesis</h3>
         <ul>
-          <li>Questão inicial formulada pelo pesquisador.</li>
-          <li>Qual sugestão veio da IA e qual raciocínio foi meu.</li>
-          <li>Fontes, trechos de código e experimentos verificados sem depender da resposta da IA.</li>
-          <li>Hipóteses rejeitadas, limitações e conclusão técnica.</li>
+          <li>The initial question formulated by the researcher.</li>
+          <li>Which suggestions came from AI and which reasoning was mine.</li>
+          <li>Sources, code excerpts, and experiments checked independently of AI responses.</li>
+          <li>Rejected hypotheses, limitations, and technical conclusions.</li>
         </ul>
       </div>
     </section>
@@ -175,5 +175,6 @@
       fromHash();
     })();
   </script>
+  <script src="../assets/i18n.js" defer></script>
 </body>
 </html>
